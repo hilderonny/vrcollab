@@ -1,8 +1,69 @@
-<!DOCTYPE html>
 <html>
+    <head>
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
+        <script src="https://aframe.io/releases/0.7.0/aframe.min.js"></script>
+        <script>
+$(function() {
+
+    function eventDebugger(event) {
+        console.log(event);
+        var textEl = document.querySelector('a-text');
+        textEl.setAttribute('value', event.type);
+    }
+
+    function addImage(imageurl, d, w, h, rx, ry, rz) {
+        var sceneEl = document.querySelector('a-scene');
+        var entityEl = document.createElement('a-entity');
+        var planeEl = document.createElement('a-plane');
+        planeEl.setAttribute('position', {x:0,y:0,z:-d});
+        planeEl.setAttribute('width', w);
+        planeEl.setAttribute('height', h);
+        planeEl.addEventListener('click', function() {
+            planeEl.setAttribute('position', {z:-3});
+            planeEl.setAttribute('scale', {x:4,y:4});
+        });
+        planeEl.addEventListener('mouseleave', function() {
+            planeEl.setAttribute('position', {z:-d});
+            planeEl.setAttribute('scale', {x:1,y:1});
+        });
+        entityEl.setAttribute('rotation', rx + ' ' + ry + ' ' + rz);
+        entityEl.appendChild(planeEl);
+        sceneEl.appendChild(entityEl);
+        var image = new Image();
+        image.onload = function() {
+            planeEl.setAttribute('src', this.src);
+            if (this.width > this.height) planeEl.setAttribute('height', w * this.height / this.width);
+            if (this.height > this.width) planeEl.setAttribute('width', h * this.width / this.height);
+        }
+        image.src = '/images/' + imageurl;
+    }
+
+    $.get('/api/images', function(images) {
+        var count = images.length;
+        var zeilen = 6;
+        for (var y = -zeilen/2, i = 0; y < zeilen/2 && i < count; y++) {
+            var spalten = 20;
+            if (y === -2 || y === 1) spalten = 17;
+            if (y === -3 || y === 2) spalten = 12;
+            for (var x = 0; x < spalten && i < count; x++, i++) {
+                addImage(images[i], 6.6, 2, 2, (y + .5) * 18, x * (360 / spalten), 0);
+            }
+        }
+        document.querySelector('a-scene').addEventListener('enter-vr', function() {
+            var camera = document.querySelector('#camera');
+            camera.setAttribute('position', {y:-1.6});
+        });
+    });
+});
+        </script>
+    </head>
     <body>
-        <img src="api/phantom?url=https://www.avorium.de" />
-        <img src="api/phantom?url=https://www.google.de" />
-        <img src="api/phantom?url=http://www.iproconsult.com" />
+        <a-scene>
+            <a-sky src="R0010365_20170416122548.JPG"></a-sky>
+            <a-entity camera id="camera" look-controls wasd-controls gearvr-controls>
+                <a-cursor></a-cursor>
+            </a-entity>
+            <a-light type="ambient" color="#fff"></a-light>
+        </a-scene>
     </body>
 </html>
