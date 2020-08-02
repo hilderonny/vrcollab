@@ -1,69 +1,115 @@
+<!DOCTYPE html>
 <html>
-    <head>
-        <script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
-        <script src="https://aframe.io/releases/0.7.0/aframe.min.js"></script>
-        <script>
-$(function() {
-
-    function eventDebugger(event) {
-        console.log(event);
-        var textEl = document.querySelector('a-text');
-        textEl.setAttribute('value', event.type);
-    }
-
-    function addImage(imageurl, d, w, h, rx, ry, rz) {
-        var sceneEl = document.querySelector('a-scene');
-        var entityEl = document.createElement('a-entity');
-        var planeEl = document.createElement('a-plane');
-        planeEl.setAttribute('position', {x:0,y:0,z:-d});
-        planeEl.setAttribute('width', w);
-        planeEl.setAttribute('height', h);
-        planeEl.addEventListener('click', function() {
-            planeEl.setAttribute('position', {z:-3});
-            planeEl.setAttribute('scale', {x:4,y:4});
-        });
-        planeEl.addEventListener('mouseleave', function() {
-            planeEl.setAttribute('position', {z:-d});
-            planeEl.setAttribute('scale', {x:1,y:1});
-        });
-        entityEl.setAttribute('rotation', rx + ' ' + ry + ' ' + rz);
-        entityEl.appendChild(planeEl);
-        sceneEl.appendChild(entityEl);
-        var image = new Image();
-        image.onload = function() {
-            planeEl.setAttribute('src', this.src);
-            if (this.width > this.height) planeEl.setAttribute('height', w * this.height / this.width);
-            if (this.height > this.width) planeEl.setAttribute('width', h * this.width / this.height);
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="utf-8"/>
+    <title>Babylon - Getting Started</title>
+    <!--- Link to the last version of BabylonJS --->
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <style>
+        html, body {
+            overflow: hidden;
+            width   : 100%;
+            height  : 100%;
+            margin  : 0;
+            padding : 0;
         }
-        image.src = '/images/' + imageurl;
-    }
 
-    $.get('/api/images', function(images) {
-        var count = images.length;
-        var zeilen = 6;
-        for (var y = -zeilen/2, i = 0; y < zeilen/2 && i < count; y++) {
-            var spalten = 20;
-            if (y === -2 || y === 1) spalten = 17;
-            if (y === -3 || y === 2) spalten = 12;
-            for (var x = 0; x < spalten && i < count; x++, i++) {
-                addImage(images[i], 6.6, 2, 2, (y + .5) * 18, x * (360 / spalten), 0);
-            }
+        #renderCanvas {
+            width   : 100%;
+            height  : 100%;
+            touch-action: none;
         }
-        document.querySelector('a-scene').addEventListener('enter-vr', function() {
-            var camera = document.querySelector('#camera');
-            camera.setAttribute('position', {y:-1.6});
+    </style>
+</head>
+<body>
+    <canvas id="renderCanvas"></canvas>
+    <script>
+        window.addEventListener('DOMContentLoaded', async function(){
+            // get the canvas DOM element
+            var canvas = document.getElementById('renderCanvas');
+
+            // load the 3D engine
+            var engine = new BABYLON.Engine(canvas, true);
+
+            var createScene = async function () {
+
+                var scene = new BABYLON.Scene(engine);
+
+                // Lights
+                var light0 = new BABYLON.DirectionalLight("Omni", new BABYLON.Vector3(-2, -5, 2), scene);
+                var light1 = new BABYLON.PointLight("Omni", new BABYLON.Vector3(2, -5, -2), scene);
+
+                // Need a free camera for collisions
+                var camera = new BABYLON.FreeCamera("FreeCamera", new BABYLON.Vector3(0, 1.6, 0), scene);
+                camera.attachControl(canvas, true);
+                camera.keysUp.push(87); // "w"
+            	camera.keysDown.push(83); // "s"
+                camera.keysLeft.push(65); // "a"
+                camera.keysRight.push(68); // "d"
+                camera.speed = .1;
+
+                //Ground
+                var ground = BABYLON.Mesh.CreatePlane("ground", 20.0, scene);
+                ground.material = new BABYLON.StandardMaterial("groundMat", scene);
+                ground.material.diffuseColor = new BABYLON.Color3(1, 1, 1);
+                ground.material.backFaceCulling = false;
+                ground.rotation = new BABYLON.Vector3(Math.PI / 2, 0, 0);
+                ground.position = new BABYLON.Vector3(0, 0, 0);
+
+                //Simple crate
+                var box = BABYLON.Mesh.CreateBox("crate", 2, scene);
+                box.material = new BABYLON.StandardMaterial("Mat", scene);
+                box.material.diffuseTexture = new BABYLON.Texture("textures/crate.png", scene);
+                box.material.diffuseTexture.hasAlpha = true;
+                box.position = new BABYLON.Vector3(3, 1, 8);
+
+                // Skybox
+                var skybox = BABYLON.Mesh.CreateBox("skyBox", 100.0, scene);
+                var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
+                skyboxMaterial.emissiveColor = new BABYLON.Color3(.8, .8, 1);
+                skyboxMaterial.backFaceCulling = false;
+                skyboxMaterial.disableLighting = true;
+                skybox.material = skyboxMaterial;
+                skybox.infiniteDistance = true;
+
+                //Set gravity for the scene (G force like, on Y-axis)
+                scene.gravity = new BABYLON.Vector3(0, -0.9, 0);
+
+                // Enable Collisions
+                scene.collisionsEnabled = true;
+
+                //Then apply collisions and gravity to the active camera
+                camera.checkCollisions = true;
+                camera.applyGravity = true;
+
+                //Set the ellipsoid around the camera (e.g. your player's size)
+                camera.ellipsoid = new BABYLON.Vector3(.5, .8, .25);
+                camera.minZ = .15;
+
+                //finally, say which mesh will be collisionable
+                ground.checkCollisions = true;
+                box.checkCollisions = true;
+
+                const xr = await scene.createDefaultXRExperienceAsync({
+                    floorMeshes: [ground]
+                });
+
+                return scene;
+            };
+
+            // call the createScene function
+            var scene = await createScene();
+
+            // run the render loop
+            engine.runRenderLoop(function(){
+                scene.render();
+            });
+
+            // the canvas/window resize event handler
+            window.addEventListener('resize', function(){
+                engine.resize();
+            });
         });
-    });
-});
-        </script>
-    </head>
-    <body>
-        <a-scene>
-            <a-sky src="R0010365_20170416122548.JPG"></a-sky>
-            <a-entity camera id="camera" look-controls wasd-controls gearvr-controls>
-                <a-cursor></a-cursor>
-            </a-entity>
-            <a-light type="ambient" color="#fff"></a-light>
-        </a-scene>
-    </body>
+    </script>
+</body>
 </html>

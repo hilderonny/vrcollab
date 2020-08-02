@@ -1,24 +1,11 @@
 {
-  "name": "vrwebwall",
+  "name": "vrcollab",
   "version": "1.0.0",
-  "description": "Get an overview over a website structure by placing its pages around you in a VR environment",
   "main": "app.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/hilderonny/vrwebwall.git"
-  },
   "author": "Ronny Hildebrandt",
   "license": "Unlicense",
-  "bugs": {
-    "url": "https://github.com/hilderonny/vrwebwall/issues"
-  },
-  "homepage": "https://github.com/hilderonny/vrwebwall#readme",
   "dependencies": {
     "express": "^4.16.2",
-    "https": "^1.0.0",
-    "phantom": "^4.0.5"
+    "https": "^1.0.0"
   }
 }

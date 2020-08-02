@@ -5,10 +5,9 @@ var https = require('https');
 
 var app = express();
 app.use(express.static(__dirname + '/public'));
-app.use('/node_modules', express.static(__dirname + '/node_modules'));
 
-app.use('/api/phantom', require('./api/phantom'));
-app.use('/api/images', require('./api/images'));
+app.use('/api/objects', require('./api/objects'));
+app.use('/api/universes', require('./api/universes'));
 
 const HTTP_PORT = 80;
 const HTTPS_PORT = 443;
