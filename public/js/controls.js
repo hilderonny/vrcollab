@@ -1,21 +1,25 @@
-import {PointerLockControls} from './PointerLockControls.module.js';
-
 import camera from './camera.js';
-import environment from './environment.js';
 
 var controls = {
 
-    init: function (lockEl) {
-        this.pointerLockControls = new PointerLockControls(camera.cam3, document.body);
-        this.pointerLockControls.addEventListener('lock', function() {
-            lockEl.classList.add('invisible');
+    init: function (renderer) {
+        var startX, startY;
+        var mouseMove = function(e) {
+            var deltaX = e.clientX - startX;
+            var deltaY = e.clientY - startY;
+            var width = window.innerWidth, height = window.innerHeight, min = Math.min(width, height);
+            camera.cam3.rotation.x += deltaY/min;
+            camera.cam3.rotation.y += deltaX/min;
+            startX = e.clientX; startY = e.clientY;
+        };
+        renderer.domElement.addEventListener('mousedown', function(e) {
+            renderer.domElement.addEventListener('mousemove', mouseMove);
+            startX = e.clientX; startY = e.clientY;
+            e.preventDefault();
+		    e.stopPropagation();
         });
-        this.pointerLockControls.addEventListener('unlock', function() {
-            lockEl.classList.remove('invisible');
-        });
-        environment.scene.add( this.pointerLockControls.getObject() );
-        lockEl.addEventListener('click', () => {
-            this.pointerLockControls.lock();
+        renderer.domElement.addEventListener('mouseup', function(e) {
+            renderer.domElement.removeEventListener('mousemove', mouseMove);
         });
     },
 

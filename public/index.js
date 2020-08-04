@@ -20,7 +20,7 @@ window.addEventListener('resize', resize);
 var init = function() {
     environment.init();
     camera.init();
-    controls.init(document.querySelector('pointer-lock'));
+    controls.init(renderer);
 };
 
 // NEXT: World plane, Raum-Rahmen und Box in der Ecke
