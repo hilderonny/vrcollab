@@ -30,6 +30,7 @@ window.addEventListener('load', function() {
     init();
     resize();
     renderer.setAnimationLoop(function() {
+        controls.update();
         renderer.render(environment.scene, camera.cam3);
     });
 });
