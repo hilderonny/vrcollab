@@ -1,3 +1,4 @@
+import {Raycaster, Vector2} from './three.module.js';
 import camera from './camera.js';
 
 var mouseSpeed = 2;
@@ -7,14 +8,25 @@ var controls = {
     
     forward: 0,
     sideward: 0,
+    clickableobjects: [],
+    mouseVector: null,
+    raycaster: null,
+    hoverlisteners: [],
+    clicklisteners: [],
 
     init: function (renderer) {
         var startX, startY, mouseDown;
-        var mouseMove = function(e) {
+        this.mouseVector = new Vector2();
+        this.raycaster = new Raycaster();
+        this.raycaster.near = .1;
+        this.raycaster.far = 20;
+        var mouseMove = (e) => {
+            this.mouseVector.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	        this.mouseVector.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
             if (mouseDown) {
                 var deltaX = e.clientX - startX;
                 var deltaY = e.clientY - startY;
-                var width = window.innerWidth, height = window.innerHeight, min = Math.min(width, height);
+                var min = Math.min(window.innerWidth, window.innerHeight);
                 camera.cam3.rotation.x -= deltaY/min * mouseSpeed;
                 camera.head.rotation.y -= deltaX/min * mouseSpeed;
                 startX = e.clientX; startY = e.clientY;
@@ -58,6 +70,16 @@ var controls = {
     update: function() {
         if (this.forward !== 0) camera.head.translateZ(this.forward * moveSpeed);
         if (this.sideward !== 0) camera.head.translateX(this.sideward * moveSpeed);
+        if (this.hoverlisteners.length) {
+            this.raycaster.setFromCamera( this.mouseVector, camera.cam3 ); // https://threejs.org/docs/#api/en/core/Raycaster
+            var intersects = this.raycaster.intersectObjects( this.clickableobjects );
+            if (intersects.length) {
+                var intersection = intersects[0];
+                this.hoverlisteners.forEach(hl => hl(intersection));
+            } else {
+                this.hoverlisteners.forEach(hl => hl());
+            }
+        }
     }
 
 };

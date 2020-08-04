@@ -6,6 +6,7 @@ var environment = {
 
     scene: null,
     ground: null,
+    cube: null,
 
     init: function () {
         this.scene = new Scene();
@@ -30,13 +31,13 @@ var environment = {
         var sunLight = new DirectionalLight( 'rgb(255,255,255)', 1 );
         this.scene.add(sunLight);
         // Geometry
-        var cube = new Mesh(
+        this.cube = new Mesh(
             new BoxGeometry(),
             new MeshPhongMaterial({ color: 0xffeb3b, emissive: 0x484210 })
         );
-        cube.position.y = .5;
-        cube.position.z = -5;
-        this.scene.add(cube);
+        this.cube.position.y = .5;
+        this.cube.position.z = -5;
+        this.scene.add(this.cube);
     },
 
 };
