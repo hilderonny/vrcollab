@@ -1,4 +1,5 @@
 import {BackSide, BoxGeometry, DirectionalLight, Mesh, MeshBasicMaterial, MeshPhongMaterial, PlaneGeometry, Scene, SphereGeometry} from './three.module.js';
+import controls from './controls.js';
 
 var sceneRadius = 100;
 
@@ -6,7 +7,6 @@ var environment = {
 
     scene: null,
     ground: null,
-    cube: null,
 
     init: function () {
         this.scene = new Scene();
@@ -17,6 +17,7 @@ var environment = {
         );
         this.ground.rotation.x = -Math.PI / 2;
         this.scene.add(this.ground);
+        controls.addTeleportTarget(this.ground);
         // Sky
         var sky = new Mesh(
             new SphereGeometry(sceneRadius, 50, 50, 0, 2 * Math.PI),
@@ -31,13 +32,13 @@ var environment = {
         var sunLight = new DirectionalLight( 'rgb(255,255,255)', 1 );
         this.scene.add(sunLight);
         // Geometry
-        this.cube = new Mesh(
+        var cube = new Mesh(
             new BoxGeometry(),
             new MeshPhongMaterial({ color: 0xffeb3b, emissive: 0x484210 })
         );
-        this.cube.position.y = .5;
-        this.cube.position.z = -5;
-        this.scene.add(this.cube);
+        cube.position.y = .5;
+        cube.position.z = -5;
+        this.scene.add(cube);
     },
 
 };

@@ -9,8 +9,8 @@ var camera = {
     /** Initialize ThreeJS instance */
     init: function () {
         this.head = new Object3D();
-        this.head.position.y = 1.6;
         this.cam3 = new PerspectiveCamera(75, 1, 0.1, 1000);
+        this.cam3.position.y = 1.6;
         this.head.add(this.cam3);
         environment.scene.add(this.head);
     },

@@ -1,5 +1,6 @@
-import {Raycaster, Vector2} from './three.module.js';
+import {Mesh, MeshBasicMaterial, Raycaster, SphereGeometry, Vector2} from './three.module.js';
 import camera from './camera.js';
+import environment from './environment.js';
 
 var mouseSpeed = 2;
 var moveSpeed = .1;
@@ -9,10 +10,13 @@ var controls = {
     forward: 0,
     sideward: 0,
     clickableobjects: [],
+    teleporttargets: [],
     mouseVector: null,
     raycaster: null,
     hoverlisteners: [],
     clicklisteners: [],
+    pointerSphere: null,
+    intersection: null,
 
     init: function (renderer) {
         var startX, startY, mouseDown;
@@ -39,9 +43,12 @@ var controls = {
                 mouseDown = true;
             }
         });
-        renderer.domElement.addEventListener('mouseup', function() {
+        renderer.domElement.addEventListener('mouseup', () => {
             if (event.button == 2) {
                 mouseDown = false;
+            }
+            if (event.button == 0 && this.intersection) {
+                this.intersection.object.click(this.intersection);
             }
         });
         renderer.domElement.addEventListener('contextmenu', function(event) {
@@ -65,22 +72,38 @@ var controls = {
             }
         });
         renderer.domElement.tabIndex = 0;
+        this.pointerSphere = new Mesh(
+            new SphereGeometry(.1),
+            new MeshBasicMaterial({ color: 0xff0000 })
+        );
+        this.pointerSphere.visible = false;
+        environment.scene.add(this.pointerSphere);
     },
 
     update: function() {
         if (this.forward !== 0) camera.head.translateZ(this.forward * moveSpeed);
         if (this.sideward !== 0) camera.head.translateX(this.sideward * moveSpeed);
-        if (this.hoverlisteners.length) {
+        if (this.clickableobjects.length) {
             this.raycaster.setFromCamera( this.mouseVector, camera.cam3 ); // https://threejs.org/docs/#api/en/core/Raycaster
             var intersects = this.raycaster.intersectObjects( this.clickableobjects );
             if (intersects.length) {
-                var intersection = intersects[0];
-                this.hoverlisteners.forEach(hl => hl(intersection));
+                this.intersection = intersects[0];
+                this.pointerSphere.visible = true;
+                this.pointerSphere.position.copy(this.intersection.point);
             } else {
-                this.hoverlisteners.forEach(hl => hl());
+                this.intersection = null;
+                this.pointerSphere.visible = false;
             }
         }
-    }
+    },
+
+    addTeleportTarget: function(target) {
+        this.teleporttargets.push(target);
+        this.clickableobjects.push(target);
+        target.click = function(intersection) {
+            camera.head.position.copy(intersection.point);
+        };
+    },
 
 };
 

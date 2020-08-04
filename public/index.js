@@ -21,26 +21,7 @@ var init = function() {
     environment.init();
     camera.init();
     controls.init(renderer);
-    controls.clickableobjects.push(environment.ground);
-    controls.clickableobjects.push(environment.cube);
-    var pointerSphere = new THREE.Mesh(
-        new THREE.SphereGeometry(.1),
-        new THREE.MeshBasicMaterial({ color: 0xff0000 })
-    );
-    environment.scene.add(pointerSphere);
-    // Pointer listeners
-    controls.hoverlisteners.push((intersection) => {
-        if (intersection) {
-            pointerSphere.visible = true;
-            pointerSphere.position.copy(intersection.point);
-        } else {
-            pointerSphere.visible = false;
-        }
-    });
 };
-
-// NEXT: World plane, Raum-Rahmen und Box in der Ecke
-// NEXT: PointerLockControls https://threejs.org/examples/#misc_controls_pointerlock, besser Point-and-Click für Maus-Teleport https://threejs.org/examples/#webgl_interactive_cubes
 
 window.addEventListener('load', function() {
     init();
