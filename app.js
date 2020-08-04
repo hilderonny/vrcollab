@@ -21,6 +21,7 @@ server.listen(HTTPS_PORT, () => {
     console.log(`HTTPS running at port ${HTTPS_PORT}.`);
 });
 http.createServer((req, res) => {
+    if (!req || !req.headers || !req.headers.host) return; // Spamming bots will not be handled
     var indexOfColon = req.headers.host.lastIndexOf(':');
     var hostWithoutPort = indexOfColon > 0 ? req.headers.host.substring(0, indexOfColon) : req.headers.host;
     var newUrl = `https://${hostWithoutPort}:${HTTPS_PORT}${req.url}`;
