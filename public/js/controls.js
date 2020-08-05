@@ -75,14 +75,59 @@ var desktopControls = {
         raycaster.setFromCamera( this.mouseVector, camera.cam3 ); // https://threejs.org/docs/#api/en/core/Raycaster
     },
 
-    updateIntersection: function(intersection) {
-        this.intersection = intersection;
-    },
-
-    handleTeleport: (intersection) => {
+    handleTeleport: function(intersection) {
         camera.head.position.copy(intersection.point);
     },
 
+};
+
+var mobileControls = {
+
+    isMoving: false,
+    moveSpeed: 1,
+
+    init: function(renderer) {
+        var startX, startY, touchDown;
+        this.touchVector = new Vector2();
+        renderer.domElement.addEventListener('touchstart', (event) => {
+            startX = event.touches[0].clientX;
+            startY = event.touches[0].clientY;
+            touchDown = true;
+        });
+        renderer.domElement.addEventListener('touchmove', (event) => {
+            this.isMoving = true;
+            var touchPoint = event.touches[0];
+            this.touchVector.x = ( touchPoint.clientX / window.innerWidth ) * 2 - 1;
+	        this.touchVector.y = - ( touchPoint.clientY / window.innerHeight ) * 2 + 1;
+            if (touchDown) {
+                var deltaX = touchPoint.clientX - startX;
+                var deltaY = touchPoint.clientY - startY;
+                var min = Math.min(window.innerWidth, window.innerHeight);
+                camera.cam3.rotation.x -= deltaY/min * this.moveSpeed;
+                camera.head.rotation.y -= deltaX/min * this.moveSpeed;
+                startX = touchPoint.clientX; startY = touchPoint.clientY;
+            }
+        });
+        renderer.domElement.addEventListener('touchend', (event) => {
+            event.preventDefault();
+            if (!this.isMoving && this.intersection) {
+                this.intersection.object.click(this.intersection);
+            }
+            console.log(this.isMoving ? 'Habe mich nur bewegt' : 'Will teleportieren');
+            this.isMoving = false;
+            touchDown = false;
+        });
+    },
+
+    update: function() {},
+
+    updateRaycaster: function(raycaster) {
+        raycaster.setFromCamera( this.touchVector, camera.cam3 );
+    },
+
+    handleTeleport: function(intersection) {
+        camera.head.position.copy(intersection.point);
+    },
 };
 
 var controls = {
@@ -107,7 +152,7 @@ var controls = {
         console.log(deviceType);
         switch(deviceType) {
             case 'desktop': this.controlsInstance = desktopControls; break;
-            //case 'mobile': this.controlsInstance = desktopControls; break;
+            case 'mobile': this.controlsInstance = mobileControls; break;
             //case 'xr': this.controlsInstance = desktopControls; break;
         }
         this.controlsInstance.init(renderer);
@@ -136,7 +181,7 @@ var controls = {
                 this.intersection = null;
                 this.pointerSphere.visible = false;
             }
-            this.controlsInstance.updateIntersection(this.intersection);
+            this.controlsInstance.intersection = this.intersection;
         }
     },
 
