@@ -90,33 +90,32 @@ var mobileControls = {
         var startX, startY, touchDown;
         this.touchVector = new Vector2();
         renderer.domElement.addEventListener('touchstart', (event) => {
+            event.preventDefault();
             startX = event.touches[0].clientX;
             startY = event.touches[0].clientY;
             touchDown = true;
-        });
+        }, false);
         renderer.domElement.addEventListener('touchmove', (event) => {
-            this.isMoving = true;
+            event.preventDefault();
             var touchPoint = event.touches[0];
             this.touchVector.x = ( touchPoint.clientX / window.innerWidth ) * 2 - 1;
 	        this.touchVector.y = - ( touchPoint.clientY / window.innerHeight ) * 2 + 1;
-            if (touchDown) {
-                var deltaX = touchPoint.clientX - startX;
-                var deltaY = touchPoint.clientY - startY;
-                var min = Math.min(window.innerWidth, window.innerHeight);
-                camera.cam3.rotation.x -= deltaY/min * this.moveSpeed;
-                camera.head.rotation.y -= deltaX/min * this.moveSpeed;
-                startX = touchPoint.clientX; startY = touchPoint.clientY;
-            }
-        });
+            var deltaX = touchPoint.clientX - startX;
+            var deltaY = touchPoint.clientY - startY;
+            if (!this.isMoving) this.isMoving = deltaX !== 0 || deltaY !== 0;
+            var min = Math.min(window.innerWidth, window.innerHeight);
+            camera.cam3.rotation.x += deltaY/min * this.moveSpeed;
+            camera.head.rotation.y += deltaX/min * this.moveSpeed;
+            startX = touchPoint.clientX; startY = touchPoint.clientY;
+        }, false);
         renderer.domElement.addEventListener('touchend', (event) => {
             event.preventDefault();
             if (!this.isMoving && this.intersection) {
                 this.intersection.object.click(this.intersection);
             }
-            console.log(this.isMoving ? 'Habe mich nur bewegt' : 'Will teleportieren');
             this.isMoving = false;
             touchDown = false;
-        });
+        }, false);
     },
 
     update: function() {},
@@ -145,7 +144,8 @@ var controls = {
         } else if (
             navigator.appVersion.indexOf('Android') >= 0 ||
             navigator.appVersion.indexOf('iPad') >= 0 ||
-            navigator.appVersion.indexOf('iPhone') >= 0
+            navigator.appVersion.indexOf('iPhone') >= 0 ||
+            navigator.maxTouchPoints > 0
         ) {
             deviceType = 'mobile';
         }

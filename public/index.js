@@ -28,7 +28,7 @@ var init = function() {
     environment.scene.add(logPanel);
 };
 
-window.addEventListener('load', function() {
+window.addEventListener('DOMContentLoaded', function() {
     init();
     resize();
     renderer.setAnimationLoop(function() {
