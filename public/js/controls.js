@@ -1,6 +1,7 @@
 import {Mesh, MeshBasicMaterial, Raycaster, SphereGeometry, Vector2} from './three.module.js';
 import camera from './camera.js';
 import environment from './environment.js';
+import { LogPanel } from './geometries.js';
 
 var mouseSpeed = 2;
 var moveSpeed = .1;
@@ -19,6 +20,18 @@ var controls = {
     intersection: null,
 
     init: function (renderer) {
+        var deviceType = 'desktop';
+        if (navigator.appVersion.indexOf('OculusBrowser') >= 0) {
+            deviceType = 'xr';
+        } else if (
+            navigator.appVersion.indexOf('Android') >= 0 ||
+            navigator.appVersion.indexOf('iPad') >= 0 ||
+            navigator.appVersion.indexOf('iPhone') >= 0
+        ) {
+            deviceType = 'mobile';
+        }
+        console.log(deviceType);
+
         var startX, startY, mouseDown;
         this.mouseVector = new Vector2();
         this.raycaster = new Raycaster();
@@ -90,6 +103,7 @@ var controls = {
                 this.intersection = intersects[0];
                 this.pointerSphere.visible = true;
                 this.pointerSphere.position.copy(this.intersection.point);
+                LogPanel.lastPanel.log(this.intersection.distance);
             } else {
                 this.intersection = null;
                 this.pointerSphere.visible = false;
