@@ -3,40 +3,19 @@ import camera from './camera.js';
 import environment from './environment.js';
 import { LogPanel } from './geometries.js';
 
-var mouseSpeed = 2;
-var moveSpeed = .1;
+var desktopControls = {
 
-var controls = {
-    
+    mouseSpeed: 2,
+    moveSpeed: .1,
+        
     forward: 0,
     sideward: 0,
-    clickableobjects: [],
-    teleporttargets: [],
     mouseVector: null,
-    raycaster: null,
-    hoverlisteners: [],
-    clicklisteners: [],
-    pointerSphere: null,
     intersection: null,
 
-    init: function (renderer) {
-        var deviceType = 'desktop';
-        if (navigator.appVersion.indexOf('OculusBrowser') >= 0) {
-            deviceType = 'xr';
-        } else if (
-            navigator.appVersion.indexOf('Android') >= 0 ||
-            navigator.appVersion.indexOf('iPad') >= 0 ||
-            navigator.appVersion.indexOf('iPhone') >= 0
-        ) {
-            deviceType = 'mobile';
-        }
-        console.log(deviceType);
-
+    init: function(renderer) {
         var startX, startY, mouseDown;
         this.mouseVector = new Vector2();
-        this.raycaster = new Raycaster();
-        this.raycaster.near = .1;
-        this.raycaster.far = 20;
         var mouseMove = (e) => {
             this.mouseVector.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	        this.mouseVector.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
@@ -44,8 +23,8 @@ var controls = {
                 var deltaX = e.clientX - startX;
                 var deltaY = e.clientY - startY;
                 var min = Math.min(window.innerWidth, window.innerHeight);
-                camera.cam3.rotation.x -= deltaY/min * mouseSpeed;
-                camera.head.rotation.y -= deltaX/min * mouseSpeed;
+                camera.cam3.rotation.x -= deltaY/min * this.mouseSpeed;
+                camera.head.rotation.y -= deltaX/min * this.mouseSpeed;
                 startX = e.clientX; startY = e.clientY;
             }
         };
@@ -85,19 +64,68 @@ var controls = {
             }
         });
         renderer.domElement.tabIndex = 0;
+    },
+
+    update: function() {
+        if (this.forward !== 0) camera.head.translateZ(this.forward * this.moveSpeed);
+        if (this.sideward !== 0) camera.head.translateX(this.sideward * this.moveSpeed);
+    },
+
+    updateRaycaster: function(raycaster) {
+        raycaster.setFromCamera( this.mouseVector, camera.cam3 ); // https://threejs.org/docs/#api/en/core/Raycaster
+    },
+
+    updateIntersection: function(intersection) {
+        this.intersection = intersection;
+    },
+
+    handleTeleport: (intersection) => {
+        camera.head.position.copy(intersection.point);
+    },
+
+};
+
+var controls = {
+
+    controlsInstance: null,
+    teleporttargets: [],
+    clickableobjects: [],
+    pointerSphere: null,
+    raycaster: null,
+
+    init: function(renderer) {
+        var deviceType = 'desktop';
+        if (navigator.appVersion.indexOf('OculusBrowser') >= 0) {
+            deviceType = 'xr';
+        } else if (
+            navigator.appVersion.indexOf('Android') >= 0 ||
+            navigator.appVersion.indexOf('iPad') >= 0 ||
+            navigator.appVersion.indexOf('iPhone') >= 0
+        ) {
+            deviceType = 'mobile';
+        }
+        console.log(deviceType);
+        switch(deviceType) {
+            case 'desktop': this.controlsInstance = desktopControls; break;
+            //case 'mobile': this.controlsInstance = desktopControls; break;
+            //case 'xr': this.controlsInstance = desktopControls; break;
+        }
+        this.controlsInstance.init(renderer);
         this.pointerSphere = new Mesh(
             new SphereGeometry(.1),
             new MeshBasicMaterial({ color: 0xff0000 })
         );
         this.pointerSphere.visible = false;
         environment.scene.add(this.pointerSphere);
+        this.raycaster = new Raycaster();
+        this.raycaster.near = .1;
+        this.raycaster.far = 20;
     },
 
     update: function() {
-        if (this.forward !== 0) camera.head.translateZ(this.forward * moveSpeed);
-        if (this.sideward !== 0) camera.head.translateX(this.sideward * moveSpeed);
+        this.controlsInstance.update();
         if (this.clickableobjects.length) {
-            this.raycaster.setFromCamera( this.mouseVector, camera.cam3 ); // https://threejs.org/docs/#api/en/core/Raycaster
+            this.controlsInstance.updateRaycaster(this.raycaster);
             var intersects = this.raycaster.intersectObjects( this.clickableobjects );
             if (intersects.length) {
                 this.intersection = intersects[0];
@@ -108,17 +136,18 @@ var controls = {
                 this.intersection = null;
                 this.pointerSphere.visible = false;
             }
+            this.controlsInstance.updateIntersection(this.intersection);
         }
     },
 
-    addTeleportTarget: function(target) {
+    addTeleportTarget: function (target) {
         this.teleporttargets.push(target);
         this.clickableobjects.push(target);
-        target.click = function(intersection) {
-            camera.head.position.copy(intersection.point);
+        target.click = (intersection) => {
+            this.controlsInstance.handleTeleport(intersection);
         };
     },
 
-};
+}
 
 export default controls;
