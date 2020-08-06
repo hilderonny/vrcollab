@@ -129,6 +129,37 @@ var mobileControls = {
     },
 };
 
+var xrControls = {
+
+    xrManager: null,
+
+    init: function(renderer) {
+        this.xrManager = renderer.xr;
+        this.xrManager.enabled = true;
+        var xrStartButton = document.createElement('vrbutton');
+        xrStartButton.innerHTML = 'Enter VR';
+        xrStartButton.addEventListener('click', async () => {
+            var xrSession = await navigator.xr.requestSession('immersive-vr', { optionalFeatures: [ 'local-floor', 'bounded-floor', 'hand-tracking' ] });
+            console.log(xrSession);
+            this.xrManager.setSession(xrSession);
+            xrStartButton.style.display = 'none';
+        });
+        document.body.appendChild(xrStartButton);
+    },
+
+    update: function() {
+
+    },
+
+    updateRaycaster: function(raycaster) {
+
+    },
+
+    handleTeleport: function(intersection) {
+
+    },
+};
+
 var controls = {
 
     controlsInstance: null,
@@ -139,7 +170,7 @@ var controls = {
 
     init: function(renderer) {
         var deviceType = 'desktop';
-        if (navigator.appVersion.indexOf('OculusBrowser') >= 0) {
+        if (navigator.appVersion.indexOf('OculusBrowser') >= 0 || (navigator.appVersion.indexOf('Windows') >= 0 && navigator.xr)) {
             deviceType = 'xr';
         } else if (
             navigator.appVersion.indexOf('Android') >= 0 ||
@@ -153,7 +184,7 @@ var controls = {
         switch(deviceType) {
             case 'desktop': this.controlsInstance = desktopControls; break;
             case 'mobile': this.controlsInstance = mobileControls; break;
-            //case 'xr': this.controlsInstance = desktopControls; break;
+            case 'xr': this.controlsInstance = xrControls; break;
         }
         this.controlsInstance.init(renderer);
         this.pointerSphere = new Mesh(
