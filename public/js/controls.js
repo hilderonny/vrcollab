@@ -132,47 +132,29 @@ var mobileControls = {
     },
 };
 
-var xrControls = {
+var oculusGoControls = {
 
-    xrManager: null,
-    controller: null,
     tempMatrix: new Matrix4(),
-    intersection: null,
-    xrInputSource: null,
+    controller: null,
     touchDown: false,
+    intersection: null,
 
-    init: function(renderer) {
-        this.xrManager = renderer.xr;
-        this.xrManager.enabled = true;
-        var xrStartButton = document.createElement('vrbutton');
-        xrStartButton.innerHTML = 'Enter VR';
-        xrStartButton.addEventListener('click', async () => {
-            var xrSession = await navigator.xr.requestSession('immersive-vr', { optionalFeatures: [ 'local-floor', 'bounded-floor', 'hand-tracking' ] });
-            xrSession.addEventListener( 'end', () => {
-                xrStartButton.style.display = 'flex';
-            });
-            console.log(xrSession);
-            this.xrManager.setSession(xrSession);
-            xrStartButton.style.display = 'none';
-        });
-        document.body.appendChild(xrStartButton);
+    init: function(xrManager) {
         // Controller model
         var controllerModelFactory = new XRControllerModelFactory();
-        var controllerGrip = this.xrManager.getControllerGrip( 0 );
+        var controllerGrip = xrManager.getControllerGrip(0);
         var controllerModel = controllerModelFactory.createControllerModel(controllerGrip);
         controllerGrip.add(controllerModel);
         camera.head.add(controllerGrip);
         // Controller und Ziellinie
-        this.controller = this.xrManager.getController(0);
+        this.controller = xrManager.getController(0);
         this.controller.addEventListener('selectend', () => {
-            LogPanel.lastPanel.log('selectend');
             if (this.intersection) {
                 this.intersection.object.click(this.intersection);
             }
         });
         this.controller.addEventListener('connected', (evt) => {
-            this.xrInputSource = evt.data;
-            var isOculusGo = this.xrInputSource.profiles.includes('oculus-go');
+            this.controller.xrInputSource = evt.data;
             var geometry = new BufferGeometry();
             geometry.setAttribute( 'position', new Float32BufferAttribute( [ 0, 0, 0, 0, 0, - 1 ], 3 ) );
             geometry.setAttribute( 'color', new Float32BufferAttribute( [ 0.5, 0.5, 0.5, 0, 0, 0 ], 3 ) );
@@ -180,23 +162,19 @@ var xrControls = {
             this.controller.add(new Line( geometry, material ));
         });
         camera.head.add(this.controller);
+        LogPanel.lastPanel.log('Go');
     },
 
     update: function() {
-        if (this.touchDown && !this.xrInputSource.gamepad.buttons[2].pressed) {
+        if (this.touchDown && !this.controller.xrInputSource.gamepad.buttons[2].pressed) {
             this.touchDown = false;
-            var dir = this.xrInputSource.gamepad.axes[0];
+            var dir = this.controller.xrInputSource.gamepad.axes[0];
             if (Math.abs(dir) > .1) {
-                LogPanel.lastPanel.log(dir);  
                 camera.head.rotateY(Math.PI / 4 * (dir < 0 ? 1 : -1));
             }
-        } else if (this.xrInputSource.gamepad.buttons[2].pressed) {
+        } else if (this.controller.xrInputSource && this.controller.xrInputSource.gamepad.buttons[2].pressed) {
             this.touchDown = true;
         }
-        //LogPanel.lastPanel.log(JSON.stringify(this.xrInputSource.gamepad.axes, null, 2));
-        //for (var button of this.xrInputSource.gamepad.buttons) {
-            //LogPanel.lastPanel.log(button.pressed + ' - ' + button.touched + ' - ' + button.value);
-        //}
     },
 
     updateRaycaster: function(raycaster) {
@@ -208,6 +186,97 @@ var xrControls = {
     handleTeleport: function(intersection) {
         camera.head.position.copy(intersection.point);
     },
+
+};
+
+var oculusQuestControls = {
+
+    leftController: null,
+    rightController: null,
+
+    init: function(xrManager) {
+        // Controller model
+        var controllerModelFactory = new XRControllerModelFactory();
+        for (var i = 0; i < 2; i++) {
+            var controllerGrip = xrManager.getControllerGrip(i);
+            var controllerModel = controllerModelFactory.createControllerModel(controllerGrip);
+            controllerGrip.add(controllerModel);
+            camera.head.add(controllerGrip);
+            // Controller und Ziellinie
+            var controller = xrManager.getController(i);
+            if (i === 1) {
+                this.rightController = controller;
+                controller.addEventListener('connected', (evt) => {
+                    controller.xrInputSource = evt.data;
+                    LogPanel.lastPanel.log(JSON.stringify(controller.xrInputSource.gamepad.buttons, null, 2));
+                    var geometry = new BufferGeometry();
+                    geometry.setAttribute( 'position', new Float32BufferAttribute( [ 0, 0, 0, 0, 0, - 1 ], 3 ) );
+                    geometry.setAttribute( 'color', new Float32BufferAttribute( [ 0.5, 0.5, 0.5, 0, 0, 0 ], 3 ) );
+                    var material = new LineBasicMaterial( { vertexColors: true, blending: AdditiveBlending } );
+                    controller.add(new Line( geometry, material ));
+                });
+                controller.tempMatrix = new Matrix4();
+            } else {
+                this.leftController = controller;
+            }
+            camera.head.add(controller);
+        }
+        LogPanel.lastPanel.log('Quest');
+    },
+
+    update: function() {
+        // Buttons: 0=Trigger, 1=Grip, 2=?, 3=Stick, 4=A, 5=B
+        var triggerPressed = this.rightController.xrInputSource.gamepad.buttons[0].pressed;
+        if (this.rightController.triggerDown && !triggerPressed) {
+            this.rightController.triggerDown = false;
+            if (this.intersection) {
+                this.intersection.object.click(this.intersection);
+            }
+        } else if (this.rightController.xrInputSource && triggerPressed) {
+            this.rightController.triggerDown = true;
+        }
+    },
+
+    updateRaycaster: function(raycaster) {
+        this.rightController.tempMatrix.identity().extractRotation(this.rightController.matrixWorld);
+        raycaster.ray.origin.setFromMatrixPosition(this.rightController.matrixWorld);
+        raycaster.ray.direction.set(0, 0, -1).applyMatrix4(this.rightController.tempMatrix);
+    },
+
+    handleTeleport: function(intersection) {
+        camera.head.position.copy(intersection.point);
+    },
+
+};
+
+var xrControls = {
+
+    init: function(renderer) {
+        var xrManager = renderer.xr;
+        xrManager.enabled = true;
+        var xrStartButton = document.createElement('vrbutton');
+        xrStartButton.innerHTML = 'Enter VR';
+        xrStartButton.addEventListener('click', async () => {
+            var xrSession = await navigator.xr.requestSession('immersive-vr', { optionalFeatures: [ 'local-floor', 'bounded-floor', 'hand-tracking' ] });
+            xrSession.addEventListener( 'end', () => {
+                xrStartButton.style.display = 'flex';
+            });
+            xrSession.addEventListener('inputsourceschange', () => {
+                LogPanel.lastPanel.log('Anzahl Controller: ' + xrSession.inputSources.length);
+                if (xrSession.inputSources.length === 1) { // Oculus Go und Quest unterscheiden
+                    oculusGoControls.init(xrManager);
+                    controls.controlsInstance = oculusGoControls;
+                } else {
+                    oculusQuestControls.init(xrManager);
+                    controls.controlsInstance = oculusQuestControls;
+                }
+            });
+            xrManager.setSession(xrSession);
+            xrStartButton.style.display = 'none';
+        });
+        document.body.appendChild(xrStartButton);
+    },
+
 };
 
 var controls = {
@@ -220,7 +289,7 @@ var controls = {
 
     init: function(renderer) {
         var deviceType = 'desktop';
-        if (navigator.appVersion.indexOf('OculusBrowser') >= 0 || (navigator.appVersion.indexOf('Windows') >= 0 && navigator.xr)) {
+        if (navigator.appVersion.indexOf('OculusBrowser') >= 0 || (navigator.appVersion.indexOf('Windows') >= 0 && navigator.xr) || (navigator.appVersion.indexOf('Mac OS X') >= 0 && navigator.xr)) {
             deviceType = 'xr';
         } else if (
             navigator.appVersion.indexOf('Android') >= 0 ||
@@ -249,15 +318,14 @@ var controls = {
     },
 
     update: function() {
-        this.controlsInstance.update();
+        this.controlsInstance.update?.();
         if (this.clickableobjects.length) {
-            this.controlsInstance.updateRaycaster(this.raycaster);
+            this.controlsInstance.updateRaycaster?.(this.raycaster); // https://ponyfoo.com/articles/null-propagation-operator
             var intersects = this.raycaster.intersectObjects( this.clickableobjects );
             if (intersects.length) {
                 this.intersection = intersects[0];
                 this.pointerSphere.visible = true;
                 this.pointerSphere.position.copy(this.intersection.point);
-                //LogPanel.lastPanel.log(this.intersection.distance);
             } else {
                 this.intersection = null;
                 this.pointerSphere.visible = false;
@@ -270,7 +338,7 @@ var controls = {
         this.teleporttargets.push(target);
         this.clickableobjects.push(target);
         target.click = (intersection) => {
-            this.controlsInstance.handleTeleport(intersection);
+            this.controlsInstance.handleTeleport?.(intersection);
         };
     },
 
