@@ -3,7 +3,7 @@ import { XRControllerModelFactory } from './XRControllerModelFactory.js';
 
 import camera from './camera.js';
 import environment from './environment.js';
-import { LogPanel } from './geometries.js';
+import { LogPanel, MenuPanel } from './geometries.js';
 
 var desktopControls = {
 
@@ -198,26 +198,38 @@ var oculusQuestControls = {
         // Controller model
         var controllerModelFactory = new XRControllerModelFactory();
         for (var i = 0; i < 2; i++) {
-            var controllerGrip = xrManager.getControllerGrip(i);
-            var controllerModel = controllerModelFactory.createControllerModel(controllerGrip);
-            controllerGrip.add(controllerModel);
-            camera.head.add(controllerGrip);
-            // Controller und Ziellinie
             var controller = xrManager.getController(i);
             if (i === 1) {
+                var controllerGrip = xrManager.getControllerGrip(i);
+                var controllerModel = controllerModelFactory.createControllerModel(controllerGrip);
+                controllerGrip.add(controllerModel);
+                camera.head.add(controllerGrip);
+                // Rechter Controller und Ziellinie
                 this.rightController = controller;
-                controller.addEventListener('connected', (evt) => {
-                    controller.xrInputSource = evt.data;
-                    LogPanel.lastPanel.log(JSON.stringify(controller.xrInputSource.gamepad.buttons, null, 2));
-                    var geometry = new BufferGeometry();
+                this.rightController.addEventListener('connected', (evt) => {
+                    this.rightController.xrInputSource = evt.data;
+                    var geometry = new BufferGeometry(); // Ziellinie
                     geometry.setAttribute( 'position', new Float32BufferAttribute( [ 0, 0, 0, 0, 0, - 1 ], 3 ) );
                     geometry.setAttribute( 'color', new Float32BufferAttribute( [ 0.5, 0.5, 0.5, 0, 0, 0 ], 3 ) );
                     var material = new LineBasicMaterial( { vertexColors: true, blending: AdditiveBlending } );
-                    controller.add(new Line( geometry, material ));
+                    this.rightController.add(new Line( geometry, material ));
                 });
-                controller.tempMatrix = new Matrix4();
+                this.rightController.tempMatrix = new Matrix4();
             } else {
+                // Menü an linkem Handgelenk
                 this.leftController = controller;
+                this.leftController.addEventListener('connected', (evt) => {
+                    this.leftController.xrInputSource = evt.data;
+                    //var scale = 2;
+                    //var menupanel = new MenuPanel(scale * .28, scale * .192);
+                    var scale = .0005;
+                    var menupanel = new MenuPanel(scale * 585, scale * 546);
+                    window.menupanel = menupanel;
+                    menupanel.rotateY(Math.PI/8);
+                    menupanel.rotateZ(Math.PI/8);
+                    menupanel.rotateX(-Math.PI/4);
+                    this.leftController.add(menupanel);
+                });
             }
             camera.head.add(controller);
         }
@@ -262,6 +274,8 @@ var xrControls = {
                 xrStartButton.style.display = 'flex';
             });
             xrSession.addEventListener('inputsourceschange', () => {
+                if (xrSession.loaded) return;
+                xrSession.loaded = true;                
                 LogPanel.lastPanel.log('Anzahl Controller: ' + xrSession.inputSources.length);
                 if (xrSession.inputSources.length === 1) { // Oculus Go und Quest unterscheiden
                     oculusGoControls.init(xrManager);

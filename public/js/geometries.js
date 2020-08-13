@@ -1,4 +1,4 @@
-import {Mesh, MeshBasicMaterial, PlaneGeometry, Texture} from './three.module.js';
+import {Mesh, MeshBasicMaterial, PlaneGeometry, Texture, TextureLoader} from './three.module.js';
 
 class LogPanel extends Mesh {
 
@@ -43,4 +43,22 @@ class LogPanel extends Mesh {
 
 }
 
-export { LogPanel }
+class MenuPanel extends Mesh {
+
+    constructor(width, height) {
+        super(
+            new PlaneGeometry(width, height, 1, 1)
+        );
+        var loader = new TextureLoader();
+        this.material = new MeshBasicMaterial({
+            map: loader.load('lcars-demo-small.png'),
+            flatShading: true,
+        });        
+    }
+
+    update() {
+    }
+
+}
+
+export { LogPanel, MenuPanel }
