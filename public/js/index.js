@@ -1,10 +1,10 @@
 // Siehe https://discoverthreejs.com/book/first-steps/resize/
 
-import * as THREE from './js/three.module.js';
-import environment from './js/environment.js';
-import camera from './js/camera.js';
-import controls from './js/controls.js';
-import { LogPanel } from './js/geometries.js';
+import * as THREE from './lib/three.module.js';
+import environment from './environment.js';
+import camera from './camera.js';
+import controls from './controls.js';
+import { LogPanel } from './geometries.js';
 
 var renderer = new THREE.WebGLRenderer();
 document.body.appendChild(renderer.domElement);

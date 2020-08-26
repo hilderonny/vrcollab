@@ -1,9 +1,9 @@
-import {AdditiveBlending, BufferGeometry, Float32BufferAttribute, Line, LineBasicMaterial, Matrix4, Mesh, MeshBasicMaterial, Raycaster, SphereGeometry, Vector2} from './three.module.js';
-import { XRControllerModelFactory } from './XRControllerModelFactory.js';
+import {AdditiveBlending, BufferGeometry, Float32BufferAttribute, Line, LineBasicMaterial, Matrix4, Mesh, MeshBasicMaterial, Raycaster, SphereGeometry, Vector2} from './lib/three.module.js';
+import { XRControllerModelFactory } from './lib/XRControllerModelFactory.js';
 
 import camera from './camera.js';
 import environment from './environment.js';
-import { LogPanel, MenuPanel } from './geometries.js';
+import { EventMesh, LogPanel, MenuPanel } from './geometries.js';
 
 var desktopControls = {
 
@@ -297,7 +297,6 @@ var controls = {
 
     controlsInstance: null,
     teleporttargets: [],
-    clickableobjects: [],
     pointerSphere: null,
     raycaster: null,
 
@@ -333,14 +332,18 @@ var controls = {
 
     update: function() {
         this.controlsInstance.update?.();
-        if (this.clickableobjects.length) {
+        if (EventMesh.AllRaycasterMeshes.length) {
             this.controlsInstance.updateRaycaster?.(this.raycaster); // https://ponyfoo.com/articles/null-propagation-operator
-            var intersects = this.raycaster.intersectObjects( this.clickableobjects );
+            var intersects = this.raycaster.intersectObjects(EventMesh.AllRaycasterMeshes);
             if (intersects.length) {
+                var alreadyIntersected = this.intersection && (this.intersection.object === intersects[0].object);
+                if (this.intersection && !alreadyIntersected) this.intersection.object.sendEvent(EventMesh.EventType.PointerLeave);
                 this.intersection = intersects[0];
                 this.pointerSphere.visible = true;
                 this.pointerSphere.position.copy(this.intersection.point);
+                if (!alreadyIntersected) this.intersection.object.sendEvent(EventMesh.EventType.PointerEnter);
             } else {
+                if (this.intersection) this.intersection.object.sendEvent(EventMesh.EventType.PointerLeave);
                 this.intersection = null;
                 this.pointerSphere.visible = false;
             }
@@ -350,8 +353,8 @@ var controls = {
 
     addTeleportTarget: function (target) {
         this.teleporttargets.push(target);
-        this.clickableobjects.push(target);
-        target.click = (intersection) => {
+        target.enableForRayCaster = true;
+        target.click = (intersection) => { // TODO: Auf Event buttonUp umstellen
             this.controlsInstance.handleTeleport?.(intersection);
         };
     },

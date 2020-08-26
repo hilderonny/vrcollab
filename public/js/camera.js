@@ -1,4 +1,4 @@
-import {Object3D, PerspectiveCamera} from './three.module.js';
+import {Object3D, PerspectiveCamera} from './lib/three.module.js';
 import environment from './environment.js';
 
 var camera = {
