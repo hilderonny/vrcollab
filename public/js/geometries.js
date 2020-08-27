@@ -50,10 +50,13 @@ class EventMesh extends Mesh {
 
     /**
      * Enum aller Button Codes.
+     * Siehe https://gitlab.com/hilderonny/vrcollab/-/issues/6
      */
     static ButtonCode = {
         /** Linke Maustaste */
         MouseLeft: 300,
+        /** Touchscreen */
+        TouchScreen: 400,
     }
 
     #eventListeners = {};
@@ -191,7 +194,8 @@ class TeleportMesh extends EventMesh {
         super(geometry, material);
         super.addEventListener(EventMesh.EventType.ButtonUp, (button, point) => {
             if ([
-                EventMesh.ButtonCode.MouseLeft
+                EventMesh.ButtonCode.MouseLeft,
+                EventMesh.ButtonCode.TouchScreen,
             ].includes(button)) {
                 camera.head.position.copy(point); // Teleport
             }

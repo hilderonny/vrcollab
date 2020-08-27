@@ -89,13 +89,18 @@ var mobileControls = {
     intersection: null,
 
     init: function(renderer) {
-        var startX, startY, touchDown;
+        var startX, startY;
         this.touchVector = new Vector2();
         renderer.domElement.addEventListener('touchstart', (event) => {
             event.preventDefault();
-            startX = event.touches[0].clientX;
-            startY = event.touches[0].clientY;
-            touchDown = true;
+            var touchPoint = event.touches[0];
+            this.touchVector.x = ( touchPoint.clientX / window.innerWidth ) * 2 - 1;
+	        this.touchVector.y = - ( touchPoint.clientY / window.innerHeight ) * 2 + 1;
+            startX = touchPoint.clientX;
+            startY = touchPoint.clientY;
+            if (this.intersection) {
+                this.intersection.object.sendEvent(EventMesh.EventType.ButtonDown, EventMesh.ButtonCode.TouchScreen, this.intersection.point);
+            }
         }, false);
         renderer.domElement.addEventListener('touchmove', (event) => {
             event.preventDefault();
@@ -113,10 +118,9 @@ var mobileControls = {
         renderer.domElement.addEventListener('touchend', (event) => {
             event.preventDefault();
             if (!this.isMoving && this.intersection) {
-                this.intersection.object.click(this.intersection); // TODO: Auf Event ButtonUp umstellen
+                this.intersection.object.sendEvent(EventMesh.EventType.ButtonUp, EventMesh.ButtonCode.TouchScreen, this.intersection.point);
             }
             this.isMoving = false;
-            touchDown = false;
         }, false);
     },
 
