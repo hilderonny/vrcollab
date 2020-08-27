@@ -1,6 +1,7 @@
 import {BackSide, BoxGeometry, DirectionalLight, Mesh, MeshBasicMaterial, MeshPhongMaterial, PlaneGeometry, Scene, SphereGeometry} from './lib/three.module.js';
+import camera from './camera.js';
 import controls from './controls.js';
-import {EventMesh, LogPanel} from './geometries.js';
+import {EventMesh, LogPanel, TeleportMesh} from './geometries.js';
 
 var sceneRadius = 100;
 
@@ -12,19 +13,12 @@ var environment = {
     init: function () {
         this.scene = new Scene();
         // Ground
-        this.ground = new EventMesh(
+        this.ground = new TeleportMesh(
             new PlaneGeometry(sceneRadius * 2, sceneRadius * 2, 1, 1),
             new MeshBasicMaterial({ color: 0x4caf50 })
         );
         this.ground.rotation.x = -Math.PI / 2;
-        this.ground.addEventListener(EventMesh.EventType.PointerEnter, () => {
-            LogPanel.lastPanel.log('Enter Ground');
-        });
-        this.ground.addEventListener(EventMesh.EventType.PointerLeave, () => {
-            LogPanel.lastPanel.log('Leave Ground');
-        });
         this.scene.add(this.ground);
-        controls.addTeleportTarget(this.ground);
         // Sky
         var sky = new Mesh(
             new SphereGeometry(sceneRadius, 50, 50, 0, 2 * Math.PI),

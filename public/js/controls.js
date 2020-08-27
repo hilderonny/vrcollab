@@ -30,11 +30,14 @@ var desktopControls = {
                 startX = e.clientX; startY = e.clientY;
             }
         };
-        renderer.domElement.addEventListener('mousedown', function(event) {
+        renderer.domElement.addEventListener('mousedown', (event) => {
             // React only to right mouse button for movement
             if (event.button == 2) {
                 startX = event.clientX; startY = event.clientY;
                 mouseDown = true;
+            }
+            if (event.button == 0 && this.intersection) {
+                this.intersection.object.sendEvent(EventMesh.EventType.ButtonDown, EventMesh.ButtonCode.MouseLeft, this.intersection.point);
             }
         });
         renderer.domElement.addEventListener('mouseup', () => {
@@ -42,7 +45,7 @@ var desktopControls = {
                 mouseDown = false;
             }
             if (event.button == 0 && this.intersection) {
-                this.intersection.object.click(this.intersection);
+                this.intersection.object.sendEvent(EventMesh.EventType.ButtonUp, EventMesh.ButtonCode.MouseLeft, this.intersection.point);
             }
         });
         renderer.domElement.addEventListener('contextmenu', function(event) {
@@ -75,10 +78,6 @@ var desktopControls = {
 
     updateRaycaster: function(raycaster) {
         raycaster.setFromCamera( this.mouseVector, camera.cam3 ); // https://threejs.org/docs/#api/en/core/Raycaster
-    },
-
-    handleTeleport: function(intersection) {
-        camera.head.position.copy(intersection.point);
     },
 
 };
@@ -114,7 +113,7 @@ var mobileControls = {
         renderer.domElement.addEventListener('touchend', (event) => {
             event.preventDefault();
             if (!this.isMoving && this.intersection) {
-                this.intersection.object.click(this.intersection);
+                this.intersection.object.click(this.intersection); // TODO: Auf Event ButtonUp umstellen
             }
             this.isMoving = false;
             touchDown = false;
@@ -127,9 +126,6 @@ var mobileControls = {
         raycaster.setFromCamera( this.touchVector, camera.cam3 );
     },
 
-    handleTeleport: function(intersection) {
-        camera.head.position.copy(intersection.point);
-    },
 };
 
 var oculusGoControls = {
@@ -150,7 +146,7 @@ var oculusGoControls = {
         this.controller = xrManager.getController(0);
         this.controller.addEventListener('selectend', () => {
             if (this.intersection) {
-                this.intersection.object.click(this.intersection);
+                this.intersection.object.click(this.intersection); // TODO: Auf Event ButtonUp umstellen
             }
         });
         this.controller.addEventListener('connected', (evt) => {
@@ -181,10 +177,6 @@ var oculusGoControls = {
         this.tempMatrix.identity().extractRotation(this.controller.matrixWorld);
         raycaster.ray.origin.setFromMatrixPosition(this.controller.matrixWorld);
         raycaster.ray.direction.set(0, 0, -1).applyMatrix4(this.tempMatrix);
-    },
-
-    handleTeleport: function(intersection) {
-        camera.head.position.copy(intersection.point);
     },
 
 };
@@ -242,7 +234,7 @@ var oculusQuestControls = {
         if (this.rightController.triggerDown && !triggerPressed) {
             this.rightController.triggerDown = false;
             if (this.intersection) {
-                this.intersection.object.click(this.intersection);
+                this.intersection.object.click(this.intersection); // TODO: Auf Event ButtonUp umstellen
             }
         } else if (this.rightController.xrInputSource && triggerPressed) {
             this.rightController.triggerDown = true;
@@ -253,10 +245,6 @@ var oculusQuestControls = {
         this.rightController.tempMatrix.identity().extractRotation(this.rightController.matrixWorld);
         raycaster.ray.origin.setFromMatrixPosition(this.rightController.matrixWorld);
         raycaster.ray.direction.set(0, 0, -1).applyMatrix4(this.rightController.tempMatrix);
-    },
-
-    handleTeleport: function(intersection) {
-        camera.head.position.copy(intersection.point);
     },
 
 };
@@ -302,7 +290,7 @@ var controls = {
 
     init: function(renderer) {
         var deviceType = 'desktop';
-        if (navigator.appVersion.indexOf('OculusBrowser') >= 0 || (navigator.appVersion.indexOf('Windows') >= 0 && navigator.xr) || (navigator.appVersion.indexOf('Mac OS X') >= 0 && navigator.xr)) {
+        if (navigator.appVersion.indexOf('OculusBrowser') >= 0 /*|| (navigator.appVersion.indexOf('Windows') >= 0 && navigator.xr) || (navigator.appVersion.indexOf('Mac OS X') >= 0 && navigator.xr)*/) {
             deviceType = 'xr';
         } else if (
             navigator.appVersion.indexOf('Android') >= 0 ||
@@ -349,14 +337,6 @@ var controls = {
             }
             this.controlsInstance.intersection = this.intersection;
         }
-    },
-
-    addTeleportTarget: function (target) {
-        this.teleporttargets.push(target);
-        target.enableForRayCaster = true;
-        target.click = (intersection) => { // TODO: Auf Event buttonUp umstellen
-            this.controlsInstance.handleTeleport?.(intersection);
-        };
     },
 
 }

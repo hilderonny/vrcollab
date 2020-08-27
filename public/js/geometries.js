@@ -1,4 +1,6 @@
-import {Mesh, MeshBasicMaterial, PlaneGeometry, Texture, TextureLoader} from './lib/three.module.js';
+import {Mesh, MeshBasicMaterial, PlaneGeometry, Texture, TextureLoader, Vector3} from './lib/three.module.js';
+
+import camera from './camera.js';
 
 /**
  * Grundlage aller Meshes, die irgendwie manipuliert oder mit denen interagiert werden kann.
@@ -14,7 +16,6 @@ class EventMesh extends Mesh {
 
      /**
       * Enum aller Event Typen
-      * @enum {string}
       */
     static EventType = {
         /**
@@ -34,6 +35,7 @@ class EventMesh extends Mesh {
          * Callback-Parameter:
          * - target : Objekt, das das Event betrifft
          * - button : Code des Buttons, der gedrückt wurde
+         * - point : 3D-Punkt, an dem der Zeiger beim Button-Druck auf das Objekt trifft
          */
         ButtonDown: 'buttondown',
         /**
@@ -41,13 +43,13 @@ class EventMesh extends Mesh {
          * Callback-Parameter:
          * - target : Objekt, das das Event betrifft
          * - button : Code des Buttons, der losgelassen wurde
+         * - point : 3D-Punkt, an dem der Zeiger beim Button-Loslassen auf das Objekt trifft
          */
         ButtonUp: 'buttonup'
     }
 
     /**
-     * Enum aller Button Codes
-     * @enum {number}
+     * Enum aller Button Codes.
      */
     static ButtonCode = {
         /** Linke Maustaste */
@@ -56,17 +58,10 @@ class EventMesh extends Mesh {
 
     #eventListeners = {};
 
-    /**
-     * Callback für Events
-     * @callback eventCallback
-     * @param {EventMesh} target Objekt, auf das sich das Event bezieht
-     * @param {ButtonCode} buttonCode Optional. Code des Buttons (EventMesh.ButtonCode), wenn Event ButtonDown oder ButtonUp ist
-     */
-
      /**
       * Erstellt eine EventMesh
-      * @param {*} geometry Optional. Ohne Angabe wird das eine BufferGeometry.
-      * @param {*} material Optional. Ohne Angabe wird das eine MeshBasicMaterial.
+      * @param geometry Optional. Ohne Angabe wird das eine BufferGeometry.
+      * @param material Optional. Ohne Angabe wird das eine MeshBasicMaterial.
       */
     constructor(geometry, material) {
         super(geometry, material);
@@ -75,8 +70,8 @@ class EventMesh extends Mesh {
     /**
      * Registriert einen Event Listener.
      * Bei mehrfacher Registrierung wird der Listener mehrfach aufgerufen.
-     * @param {EventType} eventType Event, auf das gelauscht werden soll.
-     * @param {eventCallback} listener Listener, der bei Eintreten des Events aufgerufen wird.
+     * @param eventType Event, auf das gelauscht werden soll.
+     * @param listener Listener, der bei Eintreten des Events aufgerufen wird.
      */
     addEventListener(eventType, listener) {
         var listeners = this.#eventListeners[eventType];
@@ -89,7 +84,6 @@ class EventMesh extends Mesh {
 
     /**
      * Aktiviert das Objekt für Raycaster oder deaktiviert es.
-     * @type {boolean}
      */
     set enableForRayCaster(enable) {
         var pos = EventMesh.AllRaycasterMeshes.indexOf(this);
@@ -103,8 +97,8 @@ class EventMesh extends Mesh {
     /**
      * Entfernt einen Event Listener.
      * Bei mehrfacher Registrierung wird nur die erste Registrierung gelöscht.
-     * @param {EventType} eventType Event, auf das gelauscht wurde.
-     * @param {eventCallback} listener Listener, der bei Eintreten des Events aufgerufen wurde.
+     * @param eventType Event, auf das gelauscht wurde.
+     * @param listener Listener, der bei Eintreten des Events aufgerufen wurde.
      */
     removeEventListener(eventType, listener) {
         var listeners = this.#eventListeners[eventType];
@@ -117,14 +111,15 @@ class EventMesh extends Mesh {
     /**
      * Sendet ein bestimmtes Event an alle Listeners.
      * target wird dabei automatisch bestimmt, buttonCode muss vom Aufrufer ggf. gesetzt werden.
-     * @param {EventType} eventType Event, das gesendet werden soll
-     * @param {ButtonCode} buttonCode Optional. Code des Buttons (EventMesh.ButtonCode), wenn denn einer gedrückt wurde
+     * @param eventType Event, das gesendet werden soll
+     * @param buttonCode Optional. Code des Buttons (EventMesh.ButtonCode), wenn denn einer gedrückt wurde
+     * @param point Optional. Punkt, an dem der Zeiger auf das Objekt trifft
      */
-    sendEvent(eventType, buttonCode) {
+    sendEvent(eventType, buttonCode, point) {
         var listeners = this.#eventListeners[eventType];
         if (!listeners) return;
         for (var listener of listeners) {
-            listener(this, buttonCode);
+            listener(buttonCode, point);
         }
     }
 }
@@ -190,4 +185,20 @@ class MenuPanel extends Mesh {
 
 }
 
-export { EventMesh, LogPanel, MenuPanel }
+class TeleportMesh extends EventMesh {
+
+    constructor(geometry, material) {
+        super(geometry, material);
+        super.addEventListener(EventMesh.EventType.ButtonUp, (button, point) => {
+            if ([
+                EventMesh.ButtonCode.MouseLeft
+            ].includes(button)) {
+                camera.head.position.copy(point); // Teleport
+            }
+        });
+        super.enableForRayCaster = true;
+    }
+
+}
+
+export { EventMesh, LogPanel, MenuPanel, TeleportMesh }
