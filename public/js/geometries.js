@@ -57,8 +57,48 @@ class EventMesh extends Mesh {
         MouseLeft: 300,
         /** Touchscreen */
         TouchScreen: 400,
+        /** Quest Linker Trigger */
+        QuestLeftTrigger: 500,
+        /** Quest Linker Grip */
+        QuestLeftGrip: 501,
+        /** Quest Linker Stick drücken */
+        QuestLeftStickPress: 502,
+        /** Quest Linker Stick hoch */
+        QuestLeftStickUp: 503,
+        /** Quest Linker Stick runter */
+        QuestLeftStickDown: 504,
+        /** Quest Linker Stick links */
+        QuestLeftStickLeft: 505,
+        /** Quest Linker Stick rechts */
+        QuestLeftStickRight: 506,
+        /** Quest Linker Menü Button */
+        QuestLeftMenuButton: 507,
+        /** Quest Linker X Button */
+        QuestLeftXButton: 508,
+        /** Quest Linker Y Button */
+        QuestLeftYButton: 509,
+        /** Quest Rechter Trigger */
+        QuestRightTrigger: 600,
+        /** Quest Rechter Grip */
+        QuestRightGrip: 601,
+        /** Quest Rechter Stick drücken */
+        QuestRightStickPress: 602,
+        /** Quest Rechter Stick hoch */
+        QuestRightStickUp: 603,
+        /** Quest Rechter Stick runter */
+        QuestRightStickDown: 604,
+        /** Quest Rechter Stick links */
+        QuestRightStickLeft: 605,
+        /** Quest Rechter Stick rechts */
+        QuestRightStickRight: 606,
+        /** Quest Rechter Oculus Button */
+        QuestRightOculusButton: 607,
+        /** Quest Rechter A Button */
+        QuestRightAButton: 608,
+        /** Quest Rechter B Button */
+        QuestRightBButton: 609,
         /** Oculus Go Trigger */
-        OculusGoTrigger: 500,
+        GoTrigger: 700,
     }
 
     #eventListeners = {};
