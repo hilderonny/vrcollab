@@ -57,6 +57,8 @@ class EventMesh extends Mesh {
         MouseLeft: 300,
         /** Touchscreen */
         TouchScreen: 400,
+        /** Oculus Go Trigger */
+        OculusGoTrigger: 500,
     }
 
     #eventListeners = {};

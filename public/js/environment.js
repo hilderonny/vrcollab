@@ -45,6 +45,12 @@ var environment = {
         cube.addEventListener(EventMesh.EventType.PointerLeave, () => {
             LogPanel.lastPanel.log('Leave Cube');
         });
+        cube.addEventListener(EventMesh.EventType.ButtonDown, (button, point) => {
+            LogPanel.lastPanel.log('Down: ' + button + ' ' + JSON.stringify(point));
+        });
+        cube.addEventListener(EventMesh.EventType.ButtonUp, (button, point) => {
+            LogPanel.lastPanel.log('Up: ' + button + ' ' + JSON.stringify(point));
+        });
         cube.enableForRayCaster = true;
         this.scene.add(cube);
     },

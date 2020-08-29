@@ -150,7 +150,7 @@ var oculusGoControls = {
         this.controller = xrManager.getController(0);
         this.controller.addEventListener('selectend', () => {
             if (this.intersection) {
-                this.intersection.object.click(this.intersection); // TODO: Auf Event ButtonUp umstellen
+                this.intersection.object.sendEvent(EventMesh.EventType.ButtonUp, EventMesh.ButtonCode.OculusGoTrigger, this.intersection.point);
             }
         });
         this.controller.addEventListener('connected', (evt) => {
@@ -189,6 +189,22 @@ var oculusQuestControls = {
 
     leftController: null,
     rightController: null,
+    leftButtonsPressed: [],
+    rightButtonsPressed: [],
+    leftButtonMap: {
+        0: 500, // Trigger
+        1: 501, // Grip
+        3: 502, // Strick drücken
+        4: 508, // X
+        5: 509, // Y
+    },
+    rightButtonMap: {
+        0: 600, // Trigger
+        1: 601, // Grip
+        3: 602, // Strick drücken
+        4: 608, // A
+        5: 609, // B
+    },
 
     init: function(xrManager) {
         // Controller model
@@ -234,14 +250,24 @@ var oculusQuestControls = {
 
     update: function() {
         // Buttons: 0=Trigger, 1=Grip, 2=?, 3=Stick, 4=A, 5=B
-        var triggerPressed = this.rightController.xrInputSource.gamepad.buttons[0].pressed;
-        if (this.rightController.triggerDown && !triggerPressed) {
-            this.rightController.triggerDown = false;
-            if (this.intersection) {
-                this.intersection.object.click(this.intersection); // TODO: Auf Event ButtonUp umstellen
+        for (var i = 0; i < 6; i++) {
+            // Left button
+            var leftButtonPressed = this.leftController.xrInputSource.gamepad.buttons[i].pressed;
+            if (this.intersection && leftButtonPressed && !this.leftButtonsPressed[i]) {
+                // Button down
+                this.intersection.object.sendEvent(EventMesh.EventType.ButtonUp, EventMesh.ButtonCode.TouchScreen, this.intersection.point);
+            } else if (this.intersection && !leftButtonPressed && this.leftButtonsPressed[i]) {
+                // Button up
             }
-        } else if (this.rightController.xrInputSource && triggerPressed) {
-            this.rightController.triggerDown = true;
+            this.leftButtonsPressed[i] = leftButtonPressed;
+            // Right button
+            var rightButtonPressed = this.rightController.xrInputSource.gamepad.buttons[i].pressed;
+            if (this.intersection && rightButtonPressed && !this.rightButtonsPressed[i]) {
+                // Button down
+            } else if (this.intersection && !rightButtonPressed && this.rightButtonsPressed[i]) {
+                // Button up
+            }
+            this.rightButtonsPressed[i] = rightButtonPressed;
         }
     },
 
