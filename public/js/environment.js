@@ -45,11 +45,17 @@ var environment = {
         cube.addEventListener(EventMesh.EventType.PointerLeave, () => {
             LogPanel.lastPanel.log('Leave Cube');
         });
-        cube.addEventListener(EventMesh.EventType.ButtonDown, (button, point) => {
+        cube.addEventListener(EventMesh.EventType.ButtonDown, (button, point, controller) => {
             LogPanel.lastPanel.log('Down: ' + button + ' ' + JSON.stringify(point));
+            if (button === EventMesh.ButtonCode.QuestRightGrip) {
+                controller.attach(cube);
+            }
         });
-        cube.addEventListener(EventMesh.EventType.ButtonUp, (button, point) => {
+        cube.addEventListener(EventMesh.EventType.ButtonUp, (button, point, controller) => {
             LogPanel.lastPanel.log('Up: ' + button + ' ' + JSON.stringify(point));
+            if (button === EventMesh.ButtonCode.QuestRightGrip) {
+                this.scene.attach(cube);
+            }
         });
         cube.enableForRayCaster = true;
         this.scene.add(cube);

@@ -159,12 +159,13 @@ class EventMesh extends Mesh {
      * @param eventType Event, das gesendet werden soll
      * @param buttonCode Optional. Code des Buttons (EventMesh.ButtonCode), wenn denn einer gedrückt wurde
      * @param point Optional. Punkt, an dem der Zeiger auf das Objekt trifft
+     * @param source Optional. Bei der Quest ist dies der Controller, um Ebjekte dran zu hängen
      */
-    sendEvent(eventType, buttonCode, point) {
+    sendEvent(eventType, buttonCode, point, source) {
         var listeners = this.#eventListeners[eventType];
         if (!listeners) return;
         for (var listener of listeners) {
-            listener(buttonCode, point);
+            listener(buttonCode, point, source);
         }
     }
 }

@@ -259,20 +259,20 @@ var oculusQuestControls = {
             var leftButtonPressed = this.leftController.xrInputSource.gamepad.buttons[i].pressed;
             if (this.intersection && leftButtonPressed && !this.leftButtonsPressed[i]) {
                 // Button down
-                this.intersection.object.sendEvent(EventMesh.EventType.ButtonDown, this.leftButtonMap[i], this.intersection.point);
+                this.intersection.object.sendEvent(EventMesh.EventType.ButtonDown, this.leftButtonMap[i], this.intersection.point, this.leftController);
             } else if (this.intersection && !leftButtonPressed && this.leftButtonsPressed[i]) {
                 // Button up
-                this.intersection.object.sendEvent(EventMesh.EventType.ButtonUp, this.leftButtonMap[i], this.intersection.point);
+                this.intersection.object.sendEvent(EventMesh.EventType.ButtonUp, this.leftButtonMap[i], this.intersection.point, this.leftController);
             }
             this.leftButtonsPressed[i] = leftButtonPressed;
             // Right button
             var rightButtonPressed = this.rightController.xrInputSource.gamepad.buttons[i].pressed;
             if (this.intersection && rightButtonPressed && !this.rightButtonsPressed[i]) {
                 // Button down
-                this.intersection.object.sendEvent(EventMesh.EventType.ButtonDown, this.rightButtonMap[i], this.intersection.point);
+                this.intersection.object.sendEvent(EventMesh.EventType.ButtonDown, this.rightButtonMap[i], this.intersection.point, this.rightController);
             } else if (this.intersection && !rightButtonPressed && this.rightButtonsPressed[i]) {
                 // Button up
-                this.intersection.object.sendEvent(EventMesh.EventType.ButtonUp, this.rightButtonMap[i], this.intersection.point);
+                this.intersection.object.sendEvent(EventMesh.EventType.ButtonUp, this.rightButtonMap[i], this.intersection.point, this.rightController);
             }
             this.rightButtonsPressed[i] = rightButtonPressed;
         }
@@ -286,14 +286,14 @@ var oculusQuestControls = {
         var rightAxisLeft = this.rightController.xrInputSource.gamepad.axes[2] < -.9;
         var rightAxisRight = this.rightController.xrInputSource.gamepad.axes[2] > .9;
         if (this.intersection) {
-            this.checkAxisAndSendEvent(leftAxisUp, this.leftAxisUp, EventMesh.ButtonCode.QuestLeftStickUp);
-            this.checkAxisAndSendEvent(leftAxisDown, this.leftAxisDown, EventMesh.ButtonCode.QuestLeftStickDown);
-            this.checkAxisAndSendEvent(leftAxisLeft, this.leftAxisLeft, EventMesh.ButtonCode.QuestLeftStickLeft);
-            this.checkAxisAndSendEvent(leftAxisRight, this.leftAxisRight, EventMesh.ButtonCode.QuestLeftStickRight);
-            this.checkAxisAndSendEvent(rightAxisUp, this.rightAxisUp, EventMesh.ButtonCode.QuestRightStickUp);
-            this.checkAxisAndSendEvent(rightAxisDown, this.rightAxisDown, EventMesh.ButtonCode.QuestRightStickDown);
-            this.checkAxisAndSendEvent(rightAxisLeft, this.rightAxisLeft, EventMesh.ButtonCode.QuestRightStickLeft);
-            this.checkAxisAndSendEvent(rightAxisRight, this.rightAxisRight, EventMesh.ButtonCode.QuestRightStickRight);
+            this.checkAxisAndSendEvent(leftAxisUp, this.leftAxisUp, EventMesh.ButtonCode.QuestLeftStickUp, this.leftController);
+            this.checkAxisAndSendEvent(leftAxisDown, this.leftAxisDown, EventMesh.ButtonCode.QuestLeftStickDown, this.leftController);
+            this.checkAxisAndSendEvent(leftAxisLeft, this.leftAxisLeft, EventMesh.ButtonCode.QuestLeftStickLeft, this.leftController);
+            this.checkAxisAndSendEvent(leftAxisRight, this.leftAxisRight, EventMesh.ButtonCode.QuestLeftStickRight, this.leftController);
+            this.checkAxisAndSendEvent(rightAxisUp, this.rightAxisUp, EventMesh.ButtonCode.QuestRightStickUp, this.rightController);
+            this.checkAxisAndSendEvent(rightAxisDown, this.rightAxisDown, EventMesh.ButtonCode.QuestRightStickDown, this.rightController);
+            this.checkAxisAndSendEvent(rightAxisLeft, this.rightAxisLeft, EventMesh.ButtonCode.QuestRightStickLeft, this.rightController);
+            this.checkAxisAndSendEvent(rightAxisRight, this.rightAxisRight, EventMesh.ButtonCode.QuestRightStickRight, this.rightController);
         }
         this.leftAxisUp = leftAxisUp;
         this.leftAxisDown = leftAxisDown;
@@ -305,11 +305,11 @@ var oculusQuestControls = {
         this.rightAxisRight = rightAxisRight;
     },
 
-    checkAxisAndSendEvent: function(currentStatus, previousStatus, buttonCode) {
+    checkAxisAndSendEvent: function(currentStatus, previousStatus, buttonCode, controller) {
         if (currentStatus && !previousStatus) {
-            this.intersection.object.sendEvent(EventMesh.EventType.ButtonDown, buttonCode, this.intersection.point);
+            this.intersection.object.sendEvent(EventMesh.EventType.ButtonDown, buttonCode, this.intersection.point, controller);
         } else if (!currentStatus && previousStatus) {
-            this.intersection.object.sendEvent(EventMesh.EventType.ButtonUp, buttonCode, this.intersection.point);
+            this.intersection.object.sendEvent(EventMesh.EventType.ButtonUp, buttonCode, this.intersection.point, controller);
         }
     },
 
