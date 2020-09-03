@@ -238,6 +238,7 @@ class TeleportMesh extends EventMesh {
             if ([
                 EventMesh.ButtonCode.MouseLeft,
                 EventMesh.ButtonCode.TouchScreen,
+                EventMesh.ButtonCode.QuestRightTrigger,
             ].includes(button)) {
                 camera.head.position.copy(point); // Teleport
             }

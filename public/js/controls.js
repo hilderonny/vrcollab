@@ -217,41 +217,37 @@ var oculusQuestControls = {
     init: function(xrManager) {
         // Controller model
         var controllerModelFactory = new XRControllerModelFactory();
+        var controlsInstance = this;
         for (var i = 0; i < 2; i++) {
             var controller = xrManager.getController(i);
-            if (i === 0) {
-                var controllerGrip = xrManager.getControllerGrip(i);
-                var controllerModel = controllerModelFactory.createControllerModel(controllerGrip);
-                controllerGrip.add(controllerModel);
-                camera.head.add(controllerGrip);
-                // Rechter Controller und Ziellinie
-                this.rightController = controller;
-                this.rightController.addEventListener('connected', (evt) => {
-                    this.rightController.xrInputSource = evt.data;
+            controller.controllerGrip = xrManager.getControllerGrip(i);
+            camera.head.add(controller.controllerGrip);
+            camera.head.add(controller);
+            controller.addEventListener('connected', function(evt) {
+                this.xrInputSource = evt.data;
+                if (this.xrInputSource.handedness === 'right') {
+                    // Rechter Controller und Ziellinie
+                    var controllerModel = controllerModelFactory.createControllerModel(this.controllerGrip);
+                    this.controllerGrip.add(controllerModel);
+                    controlsInstance.rightController = this;
                     var geometry = new BufferGeometry(); // Ziellinie
                     geometry.setAttribute( 'position', new Float32BufferAttribute( [ 0, 0, 0, 0, 0, - 1 ], 3 ) );
                     geometry.setAttribute( 'color', new Float32BufferAttribute( [ 0.5, 0.5, 0.5, 0, 0, 0 ], 3 ) );
                     var material = new LineBasicMaterial( { vertexColors: true, blending: AdditiveBlending } );
-                    this.rightController.add(new Line( geometry, material ));
-                });
-                this.rightController.tempMatrix = new Matrix4();
-            } else {
-                // Menü an linkem Handgelenk
-                this.leftController = controller;
-                this.leftController.addEventListener('connected', (evt) => {
-                    this.leftController.xrInputSource = evt.data;
-                    //var scale = 2;
-                    //var menupanel = new MenuPanel(scale * .28, scale * .192);
+                    controlsInstance.rightController.add(new Line( geometry, material ));
+                    controlsInstance.rightController.tempMatrix = new Matrix4();
+                } else {
+                    // Linker Controller und Menü
+                    controlsInstance.leftController = this;
                     var scale = .0005;
                     var menupanel = new MenuPanel(scale * 585, scale * 546);
                     window.menupanel = menupanel;
                     menupanel.rotateY(Math.PI/8);
                     menupanel.rotateZ(Math.PI/8);
                     menupanel.rotateX(-Math.PI/4);
-                    this.leftController.add(menupanel);
-                });
-            }
-            camera.head.add(controller);
+                    controlsInstance.leftController.add(menupanel);
+                }
+            });
         }
         LogPanel.lastPanel.log('Quest');
     },
