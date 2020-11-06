@@ -1,16 +1,26 @@
 var express = require('express');
+var bodyParser = require('body-parser');
 var fs = require('fs');
 var http = require('http');
 var https = require('https');
 
 var app = express();
+app.use(bodyParser.json({ type: 'application/json' })); // JSON body
 app.use(express.static(__dirname + '/public'));
 
+// API für Elemente einbinden
+app.use('/api/elements', require('./api/elements'));
 app.use('/api/objects', require('./api/objects'));
 app.use('/api/universes', require('./api/universes'));
 
 const HTTP_PORT = 80;
 const HTTPS_PORT = 443;
+
+console.log(process.env.PGUSER);
+console.log(process.env.PGHOST);
+console.log(process.env.PGPASSWORD);
+console.log(process.env.PGDATABASE);
+console.log(process.env.PGPORT);
 
 var server = https.createServer({ 
     key: fs.readFileSync('./priv.key', 'utf8'), 
