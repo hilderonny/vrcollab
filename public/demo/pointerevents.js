@@ -1,11 +1,10 @@
 // Siehe https://discoverthreejs.com/book/first-steps/resize/
 
-import * as THREE from './lib/three.module.js';
+import * as THREE from '../js/lib/three.module.js';
 import environment from './environment.js';
 import camera from './camera.js';
 import controls from './controls.js';
 import { LogPanel } from './geometries.js';
-import elements from '/api/elements/lib';
 
 var renderer = new THREE.WebGLRenderer();
 document.body.appendChild(renderer.domElement);
@@ -36,21 +35,4 @@ window.addEventListener('DOMContentLoaded', async function() {
         controls.update();
         renderer.render(environment.scene, camera.cam3);
     });
-
-    var ids = await elements.getIdList();
-    console.log(ids);
-    for (var id of ids) {
-        var element = await elements.get(id);
-        console.log(element);
-    }
-    var newElement = { 'trullala' : 'fullepulle' };
-    var id = await elements.save(newElement);
-    console.log(id);
-    console.log(await elements.getIdList());
-    console.log(await elements.get(id));
-    newElement.trullala = 'hoppsassa';
-    await elements.save(newElement, id);
-    console.log(await elements.get(id));
-    await elements.del(id);
-    console.log(await elements.getIdList());
 });

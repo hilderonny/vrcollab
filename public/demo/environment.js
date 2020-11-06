@@ -1,4 +1,4 @@
-import {BackSide, BoxGeometry, DirectionalLight, Mesh, MeshBasicMaterial, MeshPhongMaterial, PlaneGeometry, Scene, SphereGeometry} from './lib/three.module.js';
+import {BackSide, BoxGeometry, DirectionalLight, Mesh, MeshBasicMaterial, MeshPhongMaterial, PlaneGeometry, Scene, SphereGeometry} from '../js/lib/three.module.js';
 import camera from './camera.js';
 import controls from './controls.js';
 import {EventMesh, LogPanel, TeleportMesh} from './geometries.js';

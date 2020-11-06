@@ -1,5 +1,5 @@
-import {AdditiveBlending, BufferGeometry, Float32BufferAttribute, Line, LineBasicMaterial, Matrix4, Mesh, MeshBasicMaterial, Raycaster, SphereGeometry, Vector2} from './lib/three.module.js';
-import { XRControllerModelFactory } from './lib/XRControllerModelFactory.js';
+import {AdditiveBlending, BufferGeometry, Float32BufferAttribute, Line, LineBasicMaterial, Matrix4, Mesh, MeshBasicMaterial, Raycaster, SphereGeometry, Vector2} from '../js/lib/three.module.js';
+import { XRControllerModelFactory } from '../js/lib/XRControllerModelFactory.js';
 
 import camera from './camera.js';
 import environment from './environment.js';
