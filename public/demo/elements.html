@@ -4,27 +4,25 @@
 		<meta charset="utf-8">
 		<title>DB Elements</title>
         <script type="module">
-
 			import elements from '/api/elements/lib';
 
-			window.addEventListener('DOMContentLoaded', async function() {
-				var ids = await elements.getIdList();
+			(async (elements) => {
+				var ids = await elements.getElementIds('scenes');
 				console.log(ids);
-				for (var id of ids) {
-					var element = await elements.get(id);
-					console.log(element);
-				}
-				var newElement = { 'trullala' : 'fullepulle' };
-				var id = await elements.save(newElement);
+				var scenes = await elements.getElementsById('scenes', ids);
+				console.log(scenes);
+				var newElement = { data: { trullala : 'fullepulle' } };
+				var id = await elements.saveElement('scenes', newElement);
 				console.log(id);
-				console.log(await elements.getIdList());
-				console.log(await elements.get(id));
-				newElement.trullala = 'hoppsassa';
-				await elements.save(newElement, id);
-				console.log(await elements.get(id));
-				await elements.del(id);
-				console.log(await elements.getIdList());
-			});
+				console.log(await elements.getElementIds('scenes'));
+				console.log((await elements.getElementsById('scenes', [id]))[0]);
+				newElement.id = id;
+				newElement.data.trullala = 'hoppsassa';
+				await elements.saveElement('scenes', newElement);
+				console.log((await elements.getElementsById('scenes', [id]))[0]);
+				await elements.deleteElement('scenes', id);
+				console.log(await elements.getElementIds('scenes'));
+			})(elements);
 
 		</script>
 	</head>

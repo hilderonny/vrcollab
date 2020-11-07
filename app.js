@@ -9,7 +9,8 @@ app.use(bodyParser.json({ type: 'application/json' })); // JSON body
 app.use(express.static(__dirname + '/public'));
 
 // API für Elemente einbinden
-app.use('/api/elements', require('./lib/elements/server'));
+require('./lib/elements/server')(app);
+
 app.use('/api/objects', require('./api/objects'));
 app.use('/api/universes', require('./api/universes'));
 
