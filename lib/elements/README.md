@@ -77,3 +77,12 @@ console.log((await elements.getElementsById('scenes', [id]))[0]);
 await elements.deleteElement('scenes', id);
 console.log(await elements.getElementIds('scenes'));
 ```
+
+## Authentifizierung
+
+Login: `/api/elements/login`
+
+Registrierung: `/api/elements/register`
+
+Man bekommt eine userId, die automatisch als HTTP Header `x-user-id` bei jedem Request übertragen wird.
+Auf dem Server werden nur die Datensätze zurück gegeben, deren `ownerid` eben dieser User-ID entsprechen.

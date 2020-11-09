@@ -7,6 +7,9 @@
 			import elements from '/api/elements/lib';
 
 			(async (elements) => {
+				if (!localStorage.getItem('userId')) {
+					location.href = '/login.html?demo/elements.html';
+				}
 				var ids = await elements.getElementIds('scenes');
 				console.log(ids);
 				var scenes = await elements.getElementsById('scenes', ids);
@@ -22,11 +25,13 @@
 				console.log((await elements.getElementsById('scenes', [id]))[0]);
 				await elements.deleteElement('scenes', id);
 				console.log(await elements.getElementIds('scenes'));
+				document.getElementById('username').innerHTML = localStorage.getItem('username');
 			})(elements);
 
 		</script>
 	</head>
 	<body>
-		Konsole gucken!
+		<p>Username: <span id="username"></span></p>
+		<p>Konsole gucken!</p>
 	</body>
 </html>
