@@ -7,20 +7,21 @@
 			import elements from '/api/elements/lib';
 
 			(async (elements) => {
-				document.getElementById('loginform').addEventListener('submit', async (event) => {
-					event.preventDefault();
+				document.getElementById('loginform').addEventListener('submit', async (evt) => {
+					evt.preventDefault();
 					localStorage.removeItem('userId');
-					var username = event.target[0].value;
-					var password = event.target[1].value;
+					var username = evt.target[0].value;
+					var password = evt.target[1].value;
 					var userId = await elements.login(username, password);
 					if (userId) {
 						localStorage.setItem('username', username);
 						localStorage.setItem('userId', userId);
-					}
-					if (!userId) return false;
-					if (location.search) {
-						var returnUrl = location.search.substr(1);
-						location.href = returnUrl;
+						if (location.search) {
+							var returnUrl = location.search.substr(1);
+							location.href = returnUrl;
+						} else {
+							location.href = '/';
+						}
 					}
 				});
 			})(elements);
@@ -28,9 +29,9 @@
 	</head>
 	<body>
 		<h1>Login</h1>
-		<form id="loginform">
-			<input type="text" name="username" />
-			<input type="password" name="password" />
+		<form id="loginform" method="post">
+			<input id="username" name="username" type="text" name="username" autocomplete="username" />
+			<input id="password" name="password" type="password" name="password" autocomplete="current-password" />
 			<button type="submit">Login</button>
 		</form>
 		<p><a href="register.html">Register</a></p>
