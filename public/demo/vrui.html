@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>VR Collaboration</title>
+        <link rel="stylesheet" href="vr.css"/>
+        <script type="module">
+
+import { Vector3, WebGLRenderer } from '../js/lib/three.module.js';
+import environment from './environment.js';
+import camera from './camera.js';
+import controls from './controls.js';
+import { LogPanel } from './geometries.js';
+import { GuiButton, GuiToggleButton } from './gui.js';
+
+var renderer = new WebGLRenderer();
+document.body.appendChild(renderer.domElement);
+
+// Window resize
+var resize = function() {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.resize();
+};
+window.addEventListener('resize', resize);
+
+// Initialize scene content
+// Das hier muss später von den Universen kommen
+var init = function() {
+    environment.init();
+    camera.init();
+    controls.init(renderer);
+    var logPanel = new LogPanel(30, 20, 80, 25, '#004', '#6f6');
+    logPanel.position.x = 20;
+    logPanel.position.y = 10;
+    logPanel.position.z = -30;
+	environment.scene.add(logPanel);
+	// GUI Panel
+	var guiButton = new GuiButton();
+    guiButton.position.copy(new Vector3( -.5, 2, -2 ));
+	environment.scene.add(guiButton);
+	var toggleButton = new GuiToggleButton();
+    toggleButton.position.copy(new Vector3( .5, 2, -2 ));
+	environment.scene.add(toggleButton);
+};
+
+window.addEventListener('DOMContentLoaded', async function() {
+    init();
+    resize();
+    renderer.setAnimationLoop(function() {
+        controls.update();
+        renderer.render(environment.scene, camera.cam3);
+    });
+});
+
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

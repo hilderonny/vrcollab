@@ -1,4 +1,4 @@
-import {Mesh, MeshBasicMaterial, PlaneGeometry, Texture, TextureLoader, Vector3} from '../js/lib/three.module.js';
+import { Mesh, MeshBasicMaterial, PlaneGeometry, Texture, TextureLoader } from '../js/lib/three.module.js';
 
 import camera from './camera.js';
 

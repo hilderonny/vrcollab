@@ -1,7 +1,5 @@
-import {BackSide, BoxGeometry, DirectionalLight, Mesh, MeshBasicMaterial, MeshPhongMaterial, PlaneGeometry, Scene, SphereGeometry} from '../js/lib/three.module.js';
-import camera from './camera.js';
-import controls from './controls.js';
-import {EventMesh, LogPanel, TeleportMesh} from './geometries.js';
+import { BackSide, DirectionalLight, Mesh, MeshBasicMaterial, PlaneGeometry, Scene, SphereGeometry, Vector3 } from '../js/lib/three.module.js';
+import { TeleportMesh } from './geometries.js';
 
 var sceneRadius = 100;
 
@@ -31,34 +29,9 @@ var environment = {
         this.scene.add(sky);
         // Sunlight
         var sunLight = new DirectionalLight( 'rgb(255,255,255)', 1 );
+        sunLight.position.x = -.7;
+        sunLight.position.z = .5;
         this.scene.add(sunLight);
-        // Cube
-        var cube = new EventMesh(
-            new BoxGeometry(),
-            new MeshPhongMaterial({ color: 0xffeb3b, emissive: 0x484210 })
-        );
-        cube.position.y = .5;
-        cube.position.z = -5;
-        cube.addEventListener(EventMesh.EventType.PointerEnter, () => {
-            LogPanel.lastPanel.log('Enter Cube');
-        });
-        cube.addEventListener(EventMesh.EventType.PointerLeave, () => {
-            LogPanel.lastPanel.log('Leave Cube');
-        });
-        cube.addEventListener(EventMesh.EventType.ButtonDown, (button, point, controller) => {
-            LogPanel.lastPanel.log('Down: ' + button + ' ' + JSON.stringify(point));
-            if (button === EventMesh.ButtonCode.QuestRightGrip) {
-                controller.attach(cube);
-            }
-        });
-        cube.addEventListener(EventMesh.EventType.ButtonUp, (button, point, controller) => {
-            LogPanel.lastPanel.log('Up: ' + button + ' ' + JSON.stringify(point));
-            if (button === EventMesh.ButtonCode.QuestRightGrip) {
-                this.scene.attach(cube);
-            }
-        });
-        cube.enableForRayCaster = true;
-        this.scene.add(cube);
     },
 
 };
