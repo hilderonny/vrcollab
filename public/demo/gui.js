@@ -1,4 +1,4 @@
-import { BufferAttribute, BufferGeometry, Mesh, MeshPhongMaterial, Object3D } from '../js/lib/three.module.js';
+import { BufferAttribute, BufferGeometry, CylinderBufferGeometry, Mesh, MeshPhongMaterial, Object3D, PlaneGeometry, TextureLoader } from '../js/lib/three.module.js';
 import { EventMesh } from './geometries.js';
 
 /**
@@ -88,8 +88,15 @@ class Border extends Mesh {
  */
 class Button extends EventMesh {
 
-    constructor(width, depth) {
+    constructor(text, imageUrl, width, depth) {
         super(
+            new PlaneGeometry(1 - 2 * width, 1 - 2 * width),
+            new MeshPhongMaterial(
+                { color: 0xeb3bff, emissive: 0x421048, map: imageUrl ? new TextureLoader().load(imageUrl) : null }
+            )
+        );
+        // Rahmen
+        var border = new Mesh(
             new BufferGeometry(),
             new MeshPhongMaterial({ color: 0xeb3bff, emissive: 0x421048 })
         );
@@ -125,19 +132,13 @@ class Button extends EventMesh {
             1.0 - width, width - 1.0, depth,    // 5
             1.0, -1.0, 0.0,                     // 7
             1.0,  0.0, 0.0,                     // 1
-
-
-            width, -width, depth,               // 2
-            width, width - 1.0, depth,          // 4
-            1.0 - width, -width, depth,         // 3
-
-            width, width - 1.0, depth,          // 4
-            1.0 - width, width - 1.0, depth,    // 5
-            1.0 - width, -width, depth,         // 3
-
         ]);
-        this.geometry.setAttribute('position', new BufferAttribute(vertices, 3));
-        this.geometry.computeVertexNormals(); // Damit das Phong Material funktioniert, siehe https://stackoverflow.com/questions/47059946/buffergeometry-showing-up-as-black-with-phongmaterial
+        border.geometry.setAttribute('position', new BufferAttribute(vertices, 3));
+        border.geometry.computeVertexNormals(); // Damit das Phong Material funktioniert, siehe https://stackoverflow.com/questions/47059946/buffergeometry-showing-up-as-black-with-phongmaterial
+        border.position.x = -.5;
+        border.position.y = .5;
+        border.position.z = -depth;
+        this.add(border);
     }
 }
 
@@ -147,20 +148,20 @@ class Button extends EventMesh {
  */
 class GuiButton extends EventMesh {
 
-    constructor() {
+    constructor(text, imageUrl) {
         super();
         var borderWidth = 0.1;
         var borderDepth = 0.3;
         var buttonTilt = 0.05;
         var buttonHeight = 0.4;
-        this.buttonInset = 0.1;
-        this.buttonInsetPressed = 0.3;
+        this.buttonInset = 0.3;
+        this.buttonInsetPressed = 0.1;
         this.add(new Border(borderWidth, borderDepth));
-        this.button = new Button(buttonTilt, buttonHeight);
+        this.button = new Button(text, imageUrl, buttonTilt, buttonHeight);
         this.button.scale.multiplyScalar(1 - ( 2 * borderWidth));
-        this.button.position.x = borderWidth;
-        this.button.position.y = -borderWidth;
-        this.button.position.z = -this.buttonInset;
+        this.button.position.x = .5;
+        this.button.position.y = -.5;
+        this.button.position.z = this.buttonInset;
         this.button.addEventListener(EventMesh.EventType.ButtonDown, () => {
             this.handleButtonDown();
         });
@@ -180,12 +181,12 @@ class GuiButton extends EventMesh {
     }
 
     setPressed(pressed) {
-        var isCurrentlyPressed = this.button.position.z === -this.buttonInsetPressed;
+        var isCurrentlyPressed = this.button.position.z === this.buttonInsetPressed;
         if (isCurrentlyPressed && !pressed) {
-            this.button.position.z = -this.buttonInset;
+            this.button.position.z = this.buttonInset;
             this.sendEvent(GuiButton.EventType.Released);
         } else if (!isCurrentlyPressed && pressed) {
-            this.button.position.z = -this.buttonInsetPressed;
+            this.button.position.z = this.buttonInsetPressed;
             this.sendEvent(GuiButton.EventType.Pressed);
         }
     }
@@ -209,14 +210,13 @@ GuiButton.EventType = {
  */
 class GuiToggleButton extends GuiButton {
 
-    constructor() {
-        super();
-        this.currentButtonInset = this.buttonInset;
+    constructor(text, imageUrl) {
+        super(text, imageUrl);
         this.shouldHandleUp = false;
     }
 
     handleButtonDown() {
-        if (this.button.position.z === -this.buttonInset) {
+        if (this.button.position.z === this.buttonInset) {
             this.setPressed(true);
             this.shouldHandleUp = false;
         } else {
@@ -226,7 +226,7 @@ class GuiToggleButton extends GuiButton {
 
     handleButtonUp() {
         if (!this.shouldHandleUp) return;
-        if (this.button.position.z === -this.buttonInsetPressed) {
+        if (this.button.position.z === this.buttonInsetPressed) {
             this.setPressed(false);
             this.shouldHandleUp = false;
         }
