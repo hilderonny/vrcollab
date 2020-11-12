@@ -40,11 +40,23 @@ var init = function() {
 	var guiButton = new GuiButton();
     guiButton.position.copy(new Vector3( -.5, 2, -2 ));
     environment.scene.add(guiButton);
+    guiButton.addEventListener(GuiButton.EventType.Pressed, function() {
+        console.log('Button pressed' , this);
+    });
+    guiButton.addEventListener(GuiButton.EventType.Released, function() {
+        console.log('Button released' , this);
+    });
     
     // Einzelner Toggle-Button
 	var toggleButton = new GuiToggleButton();
     toggleButton.position.copy(new Vector3( .5, 2, -2 ));
     environment.scene.add(toggleButton);
+    toggleButton.addEventListener(GuiButton.EventType.Pressed, function() {
+        console.log('Toggle button pressed' , this);
+    });
+    toggleButton.addEventListener(GuiButton.EventType.Released, function() {
+        console.log('Toggle button released' , this);
+    });
     
     // Toggle Button Liste, bedingen sich gegenseitig
     var toggleButtonList = new GuiToggleButtonList();
@@ -53,6 +65,13 @@ var init = function() {
     for (var i = 0; i < 3; i++) {
         var listButton = new GuiToggleButton();
         listButton.position.copy(new Vector3( i, 0, 0 ));
+        listButton.index = i; // Für Zugriff in Event Listener
+        listButton.addEventListener(GuiButton.EventType.Pressed, function() {
+            console.log('Pressed', this.index, this); // this zeigt hier auf den Button
+        });
+        listButton.addEventListener(GuiButton.EventType.Released, function() {
+            console.log('Released', this.index, this); // this zeigt hier auf den Button
+        });
         toggleButtonList.addToggleButton(listButton);
     }
 };

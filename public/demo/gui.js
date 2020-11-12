@@ -145,7 +145,7 @@ class Button extends EventMesh {
  * Button mit Rahmen, den man drücken kann.
  * Der kommt wieder raus, wenn man loslässt.
  */
-class GuiButton extends Object3D {
+class GuiButton extends EventMesh {
 
     constructor() {
         super();
@@ -172,14 +172,36 @@ class GuiButton extends Object3D {
     }
 
     handleButtonDown() {
-        this.button.position.z = -this.buttonInsetPressed;
+        this.setPressed(true);
     }
 
     handleButtonUp() {
-        this.button.position.z = -this.buttonInset;
+        this.setPressed(false);
+    }
+
+    setPressed(pressed) {
+        var isCurrentlyPressed = this.button.position.z === -this.buttonInsetPressed;
+        if (isCurrentlyPressed && !pressed) {
+            this.button.position.z = -this.buttonInset;
+            this.sendEvent(GuiButton.EventType.Released);
+        } else if (!isCurrentlyPressed && pressed) {
+            this.button.position.z = -this.buttonInsetPressed;
+            this.sendEvent(GuiButton.EventType.Pressed);
+        }
     }
 
 }
+
+GuiButton.EventType = {
+    /**
+     * Wird gesendet, wenn ein Button reingedrückt wurde, aber nicht, wenn er vorher schon gedrückt war
+     */
+    Pressed: 'guibuttonpressed',
+    /**
+     * Wird gesendet, wenn ein Button rausgedrückt oder losgelassen wurde
+     */
+    Released: 'guibuttonreleased',
+};
 
 /**
  * Umschalter-Button. Wenn man den drückt, bleibt er drin.
@@ -208,10 +230,6 @@ class GuiToggleButton extends GuiButton {
             this.setPressed(false);
             this.shouldHandleUp = false;
         }
-    }
-
-    setPressed(pressed) {
-        this.button.position.z = pressed ? -this.buttonInsetPressed : -this.buttonInset;
     }
 }
 

@@ -72,7 +72,7 @@ class EventMesh extends Mesh {
         var listeners = this.eventListeners[eventType];
         if (!listeners) return;
         for (var listener of listeners) {
-            listener(buttonCode, point, source);
+            listener.call(this, buttonCode, point, source); // Funktion erhält als "this" das Objekt selbst, das den (der, die, das?) Event verschickt
         }
     }
 }
