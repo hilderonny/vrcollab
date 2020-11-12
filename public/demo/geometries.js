@@ -9,100 +9,6 @@ import camera from './camera.js';
  */
 class EventMesh extends Mesh {
 
-    /**
-     * Liste aller Event Meshes, die für RayCaster verfügbar sind.
-     */
-    static AllRaycasterMeshes = [];
-
-     /**
-      * Enum aller Event Typen
-      */
-    static EventType = {
-        /**
-         * Controller-Zeiger zeigt auf Objekt. Dient zum visuellen Hervorheben des Objektes.
-         * Callback-Parameter:
-         * - target : Objekt, das das Event betrifft
-         */
-        PointerEnter: 'pointerenter',
-        /**
-         * Controller-Zeiger verlässt ein Objekt.
-         * Callback-Parameter:
-         * - target : Objekt, das das Event betrifft
-         */
-        PointerLeave: 'pointerleave',
-        /**
-         * Ein Controller-Knopf wird gedrückt, während der Controller auf ein Objekt zeigt.
-         * Callback-Parameter:
-         * - target : Objekt, das das Event betrifft
-         * - button : Code des Buttons, der gedrückt wurde
-         * - point : 3D-Punkt, an dem der Zeiger beim Button-Druck auf das Objekt trifft
-         */
-        ButtonDown: 'buttondown',
-        /**
-         * Ein Controller-Knopf wird losgelassen, während der Controller auf ein Objekt zeigt.
-         * Callback-Parameter:
-         * - target : Objekt, das das Event betrifft
-         * - button : Code des Buttons, der losgelassen wurde
-         * - point : 3D-Punkt, an dem der Zeiger beim Button-Loslassen auf das Objekt trifft
-         */
-        ButtonUp: 'buttonup'
-    }
-
-    /**
-     * Enum aller Button Codes.
-     * Siehe https://gitlab.com/hilderonny/vrcollab/-/issues/6
-     */
-    static ButtonCode = {
-        /** Linke Maustaste */
-        MouseLeft: 300,
-        /** Touchscreen */
-        TouchScreen: 400,
-        /** Quest Linker Trigger */
-        QuestLeftTrigger: 500,
-        /** Quest Linker Grip */
-        QuestLeftGrip: 501,
-        /** Quest Linker Stick drücken */
-        QuestLeftStickPress: 502,
-        /** Quest Linker Stick hoch */
-        QuestLeftStickUp: 503,
-        /** Quest Linker Stick runter */
-        QuestLeftStickDown: 504,
-        /** Quest Linker Stick links */
-        QuestLeftStickLeft: 505,
-        /** Quest Linker Stick rechts */
-        QuestLeftStickRight: 506,
-        /** Quest Linker Menü Button */
-        QuestLeftMenuButton: 507,
-        /** Quest Linker X Button */
-        QuestLeftXButton: 508,
-        /** Quest Linker Y Button */
-        QuestLeftYButton: 509,
-        /** Quest Rechter Trigger */
-        QuestRightTrigger: 600,
-        /** Quest Rechter Grip */
-        QuestRightGrip: 601,
-        /** Quest Rechter Stick drücken */
-        QuestRightStickPress: 602,
-        /** Quest Rechter Stick hoch */
-        QuestRightStickUp: 603,
-        /** Quest Rechter Stick runter */
-        QuestRightStickDown: 604,
-        /** Quest Rechter Stick links */
-        QuestRightStickLeft: 605,
-        /** Quest Rechter Stick rechts */
-        QuestRightStickRight: 606,
-        /** Quest Rechter Oculus Button */
-        QuestRightOculusButton: 607,
-        /** Quest Rechter A Button */
-        QuestRightAButton: 608,
-        /** Quest Rechter B Button */
-        QuestRightBButton: 609,
-        /** Oculus Go Trigger */
-        GoTrigger: 700,
-    }
-
-    #eventListeners = {};
-
      /**
       * Erstellt eine EventMesh
       * @param geometry Optional. Ohne Angabe wird das eine BufferGeometry.
@@ -110,6 +16,7 @@ class EventMesh extends Mesh {
       */
     constructor(geometry, material) {
         super(geometry, material);
+        this.eventListeners = {};
     }
 
     /**
@@ -119,10 +26,10 @@ class EventMesh extends Mesh {
      * @param listener Listener, der bei Eintreten des Events aufgerufen wird.
      */
     addEventListener(eventType, listener) {
-        var listeners = this.#eventListeners[eventType];
+        var listeners = this.eventListeners[eventType];
         if (!listeners) {
             listeners = [];
-            this.#eventListeners[eventType] = listeners;
+            this.eventListeners[eventType] = listeners;
         }
         listeners.push(listener);
     }
@@ -146,7 +53,7 @@ class EventMesh extends Mesh {
      * @param listener Listener, der bei Eintreten des Events aufgerufen wurde.
      */
     removeEventListener(eventType, listener) {
-        var listeners = this.#eventListeners[eventType];
+        var listeners = this.eventListeners[eventType];
         if (!listeners) return;
         var pos = listeners.indexOf(listener);
         if (pos < 0) return;
@@ -162,12 +69,104 @@ class EventMesh extends Mesh {
      * @param source Optional. Bei der Quest ist dies der Controller, um Ebjekte dran zu hängen
      */
     sendEvent(eventType, buttonCode, point, source) {
-        var listeners = this.#eventListeners[eventType];
+        var listeners = this.eventListeners[eventType];
         if (!listeners) return;
         for (var listener of listeners) {
             listener(buttonCode, point, source);
         }
     }
+}
+
+/**
+ * Liste aller Event Meshes, die für RayCaster verfügbar sind.
+ */
+EventMesh.AllRaycasterMeshes = [];
+
+/**
+ * Enum aller Event Typen
+ */
+EventMesh.EventType = {
+    /**
+     * Controller-Zeiger zeigt auf Objekt. Dient zum visuellen Hervorheben des Objektes.
+     * Callback-Parameter:
+     * - target : Objekt, das das Event betrifft
+     */
+    PointerEnter: 'pointerenter',
+    /**
+     * Controller-Zeiger verlässt ein Objekt.
+     * Callback-Parameter:
+     * - target : Objekt, das das Event betrifft
+     */
+    PointerLeave: 'pointerleave',
+    /**
+     * Ein Controller-Knopf wird gedrückt, während der Controller auf ein Objekt zeigt.
+     * Callback-Parameter:
+     * - target : Objekt, das das Event betrifft
+     * - button : Code des Buttons, der gedrückt wurde
+     * - point : 3D-Punkt, an dem der Zeiger beim Button-Druck auf das Objekt trifft
+     */
+    ButtonDown: 'buttondown',
+    /**
+     * Ein Controller-Knopf wird losgelassen, während der Controller auf ein Objekt zeigt.
+     * Callback-Parameter:
+     * - target : Objekt, das das Event betrifft
+     * - button : Code des Buttons, der losgelassen wurde
+     * - point : 3D-Punkt, an dem der Zeiger beim Button-Loslassen auf das Objekt trifft
+     */
+    ButtonUp: 'buttonup'
+}
+
+/**
+ * Enum aller Button Codes.
+ * Siehe https://gitlab.com/hilderonny/vrcollab/-/issues/6
+ */
+EventMesh.ButtonCode = {
+    /** Linke Maustaste */
+    MouseLeft: 300,
+    /** Touchscreen */
+    TouchScreen: 400,
+    /** Quest Linker Trigger */
+    QuestLeftTrigger: 500,
+    /** Quest Linker Grip */
+    QuestLeftGrip: 501,
+    /** Quest Linker Stick drücken */
+    QuestLeftStickPress: 502,
+    /** Quest Linker Stick hoch */
+    QuestLeftStickUp: 503,
+    /** Quest Linker Stick runter */
+    QuestLeftStickDown: 504,
+    /** Quest Linker Stick links */
+    QuestLeftStickLeft: 505,
+    /** Quest Linker Stick rechts */
+    QuestLeftStickRight: 506,
+    /** Quest Linker Menü Button */
+    QuestLeftMenuButton: 507,
+    /** Quest Linker X Button */
+    QuestLeftXButton: 508,
+    /** Quest Linker Y Button */
+    QuestLeftYButton: 509,
+    /** Quest Rechter Trigger */
+    QuestRightTrigger: 600,
+    /** Quest Rechter Grip */
+    QuestRightGrip: 601,
+    /** Quest Rechter Stick drücken */
+    QuestRightStickPress: 602,
+    /** Quest Rechter Stick hoch */
+    QuestRightStickUp: 603,
+    /** Quest Rechter Stick runter */
+    QuestRightStickDown: 604,
+    /** Quest Rechter Stick links */
+    QuestRightStickLeft: 605,
+    /** Quest Rechter Stick rechts */
+    QuestRightStickRight: 606,
+    /** Quest Rechter Oculus Button */
+    QuestRightOculusButton: 607,
+    /** Quest Rechter A Button */
+    QuestRightAButton: 608,
+    /** Quest Rechter B Button */
+    QuestRightBButton: 609,
+    /** Oculus Go Trigger */
+    GoTrigger: 700,
 }
 
 class LogPanel extends Mesh {
