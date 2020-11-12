@@ -1,6 +1,9 @@
 import { BufferAttribute, BufferGeometry, Mesh, MeshPhongMaterial, Object3D } from '../js/lib/three.module.js';
 import { EventMesh } from './geometries.js';
 
+/**
+ * Das ist der Rahmen eines GuiButtons.
+ */
 class Border extends Mesh {
 
     constructor(width, depth) {
@@ -80,6 +83,9 @@ class Border extends Mesh {
     }
 }
 
+/**
+ * Der eigentliche Knopf in einem Gui-Button, der sich bewegt.
+ */
 class Button extends EventMesh {
 
     constructor(width, depth) {
@@ -135,6 +141,10 @@ class Button extends EventMesh {
     }
 }
 
+/**
+ * Button mit Rahmen, den man drücken kann.
+ * Der kommt wieder raus, wenn man loslässt.
+ */
 class GuiButton extends Object3D {
 
     constructor() {
@@ -171,6 +181,10 @@ class GuiButton extends Object3D {
 
 }
 
+/**
+ * Umschalter-Button. Wenn man den drückt, bleibt er drin.
+ * Drückt man nochmal, kommt er wieder raus.
+ */
 class GuiToggleButton extends GuiButton {
 
     constructor() {
@@ -181,7 +195,7 @@ class GuiToggleButton extends GuiButton {
 
     handleButtonDown() {
         if (this.button.position.z === -this.buttonInset) {
-            this.button.position.z = -this.buttonInsetPressed;
+            this.setPressed(true);
             this.shouldHandleUp = false;
         } else {
             this.shouldHandleUp = true;
@@ -191,10 +205,39 @@ class GuiToggleButton extends GuiButton {
     handleButtonUp() {
         if (!this.shouldHandleUp) return;
         if (this.button.position.z === -this.buttonInsetPressed) {
-            this.button.position.z = -this.buttonInset;
+            this.setPressed(false);
             this.shouldHandleUp = false;
         }
     }
+
+    setPressed(pressed) {
+        this.button.position.z = pressed ? -this.buttonInsetPressed : -this.buttonInset;
+    }
 }
 
-export { GuiButton, GuiToggleButton }
+/**
+ * Liste von Toggle-Buttons, die sich gegensetig bedingen.
+ * Drückt man einen, kommen die anderen raus.
+ */
+class GuiToggleButtonList extends Object3D {
+
+    constructor() {
+        super();
+        this.buttonList = [];
+    }
+
+    addToggleButton(button) {
+        var buttonList = this.buttonList;
+        button.handleButtonDown = function() { // Drücken "entdrückt" alle anderen Buttons
+            for (var b of buttonList) {
+                b.setPressed(b === this);
+            }
+        }
+        button.handleButtonUp = () => {}; // Button kann nicht direkt deaktiviert werden
+        this.buttonList.push(button);
+        this.add(button);
+    }
+
+}
+
+export { GuiButton, GuiToggleButton, GuiToggleButtonList }

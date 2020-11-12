@@ -11,7 +11,7 @@ import environment from './environment.js';
 import camera from './camera.js';
 import controls from './controls.js';
 import { LogPanel } from './geometries.js';
-import { GuiButton, GuiToggleButton } from './gui.js';
+import { GuiButton, GuiToggleButton, GuiToggleButtonList } from './gui.js';
 
 var renderer = new WebGLRenderer();
 document.body.appendChild(renderer.domElement);
@@ -34,13 +34,27 @@ var init = function() {
     logPanel.position.y = 10;
     logPanel.position.z = -30;
 	environment.scene.add(logPanel);
-	// GUI Panel
+    // GUI Panel
+    
+    // Einzelner normaler Button
 	var guiButton = new GuiButton();
     guiButton.position.copy(new Vector3( -.5, 2, -2 ));
-	environment.scene.add(guiButton);
+    environment.scene.add(guiButton);
+    
+    // Einzelner Toggle-Button
 	var toggleButton = new GuiToggleButton();
     toggleButton.position.copy(new Vector3( .5, 2, -2 ));
-	environment.scene.add(toggleButton);
+    environment.scene.add(toggleButton);
+    
+    // Toggle Button Liste, bedingen sich gegenseitig
+    var toggleButtonList = new GuiToggleButtonList();
+    toggleButtonList.position.copy(new Vector3( -.5, 3, -2 ));
+    environment.scene.add(toggleButtonList);
+    for (var i = 0; i < 3; i++) {
+        var listButton = new GuiToggleButton();
+        listButton.position.copy(new Vector3( i, 0, 0 ));
+        toggleButtonList.addToggleButton(listButton);
+    }
 };
 
 window.addEventListener('DOMContentLoaded', async function() {
