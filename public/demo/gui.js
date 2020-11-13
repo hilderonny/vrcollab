@@ -90,55 +90,49 @@ class Button extends EventMesh {
 
     constructor(text, imageUrl, width, depth) {
         super(
-            new PlaneGeometry(1 - 2 * width, 1 - 2 * width),
+            new BufferGeometry(),
             new MeshPhongMaterial(
                 { color: 0xeb3bff, emissive: 0x421048, map: imageUrl ? new TextureLoader().load(imageUrl) : null }
             )
         );
-        // Rahmen
-        var border = new Mesh(
-            new BufferGeometry(),
-            new MeshPhongMaterial({ color: 0xeb3bff, emissive: 0x421048 })
-        );
         const vertices = new Float32Array([
-            0.0,  0.0, 0.0,                     // 0
-            width, -width, depth,               // 2
-            1.0,  0.0, 0.0,                     // 1
-
-            width, -width, depth,               // 2
-            1.0 - width, -width, depth,         // 3
-            1.0,  0.0, 0.0,                     // 1
-
-            0.0,  0.0, 0.0,                     // 0
-            0.0, -1.0, 0.0,                     // 6
-            width, -width, depth,               // 2
-
-            0.0, -1.0, 0.0,                     // 6
-            width, width - 1.0, depth,          // 4
-            width, -width, depth,               // 2
-
-            0.0, -1.0, 0.0,                     // 6
-            1.0 - width, width - 1.0, depth,    // 5
-            width, width - 1.0, depth,          // 4
-
-            0.0, -1.0, 0.0,                     // 6
-            1.0, -1.0, 0.0,                     // 7
-            1.0 - width, width - 1.0, depth,    // 5
-
-            1.0 - width, width - 1.0, depth,    // 5
-            1.0,  0.0, 0.0,                     // 1
-            1.0 - width, -width, depth,         // 3
-
-            1.0 - width, width - 1.0, depth,    // 5
-            1.0, -1.0, 0.0,                     // 7
-            1.0,  0.0, 0.0,                     // 1
+            0.0,  0.0, 0.0,                 
+            1.0,  0.0, 0.0,                 
+            width, -width, depth,           
+            1.0 - width, -width, depth,     
+            width, width - 1.0, depth,      
+            1.0 - width, width - 1.0, depth,
+            0.0, -1.0, 0.0,                 
+            1.0, -1.0, 0.0,                 
         ]);
-        border.geometry.setAttribute('position', new BufferAttribute(vertices, 3));
-        border.geometry.computeVertexNormals(); // Damit das Phong Material funktioniert, siehe https://stackoverflow.com/questions/47059946/buffergeometry-showing-up-as-black-with-phongmaterial
-        border.position.x = -.5;
-        border.position.y = .5;
-        border.position.z = -depth;
-        this.add(border);
+        const uvcoords = new Float32Array([
+            0.0, 1.0,
+            1.0, 1.0,
+            0.125, 0.875,
+            0.875, 0.875,
+            0.125, 0.125,
+            0.875, 0.125,
+            0.0, 0.0,
+            1.0, 0.0,
+        ]);
+        const indices = [
+            0, 2, 1,
+            3, 1, 2,
+            2, 3, 1,
+            0, 6, 2,
+            6, 4, 2,
+            6, 5, 4,
+            6, 7, 5,
+            5, 1, 3,
+            5, 7, 1,
+
+            2, 4, 3,
+            4, 5, 3,
+        ];
+        this.geometry.setAttribute( 'position', new BufferAttribute( vertices, 3 ) );
+        this.geometry.setAttribute( 'uv', new BufferAttribute( uvcoords, 2 ) );
+        this.geometry.setIndex(indices);
+        this.geometry.computeVertexNormals(); // Damit das Phong Material funktioniert, siehe https://stackoverflow.com/questions/47059946/buffergeometry-showing-up-as-black-with-phongmaterial
     }
 }
 
