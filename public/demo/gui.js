@@ -1,4 +1,4 @@
-import { BufferAttribute, BufferGeometry, CylinderBufferGeometry, Mesh, MeshPhongMaterial, Object3D, PlaneGeometry, TextureLoader } from '../js/lib/three.module.js';
+import { BufferAttribute, BufferGeometry, CanvasTexture, CylinderBufferGeometry, Mesh, MeshPhongMaterial, Object3D, PlaneGeometry, TextureLoader } from '../js/lib/three.module.js';
 import { EventMesh } from './geometries.js';
 
 /**
@@ -92,9 +92,29 @@ class Button extends EventMesh {
         super(
             new BufferGeometry(),
             new MeshPhongMaterial(
-                { color: 0xeb3bff, emissive: 0x421048, map: imageUrl ? new TextureLoader().load(imageUrl) : null }
+                { color: 0xeb3bff, emissive: 0x421048 }
             )
         );
+        this.text = text;
+        this.imageUrl = imageUrl;
+        this.textureWidth = 512;
+        this.textureHeight = 512;
+        this.ctx = document.createElement('canvas').getContext('2d');
+        this.ctx.canvas.width = this.textureWidth;
+        this.ctx.canvas.height = this.textureHeight;
+        const texture = new CanvasTexture(this.ctx.canvas);;
+        this.material.map = texture;
+        this.material.bumpMap = texture;
+        this.material.bumpScale = 0.005;
+        if (imageUrl) {
+            this.image = new Image(this.textureWidth, this.textureHeight);
+            this.image.onload = () => {
+                this.repaint();
+            }
+            this.image.src = imageUrl;
+        } else {
+            this.repaint();
+        }
         const vertices = new Float32Array([
             0.0,  0.0, 0.0,                 
             1.0,  0.0, 0.0,                 
@@ -133,6 +153,37 @@ class Button extends EventMesh {
         this.geometry.setAttribute( 'uv', new BufferAttribute( uvcoords, 2 ) );
         this.geometry.setIndex(indices);
         this.geometry.computeVertexNormals(); // Damit das Phong Material funktioniert, siehe https://stackoverflow.com/questions/47059946/buffergeometry-showing-up-as-black-with-phongmaterial
+    }
+
+    repaint() {
+        this.ctx.fillStyle = '#FFF';
+        this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+        if (this.image) {
+            this.ctx.drawImage(this.image, 0, 0, this.image.width, this.image.height);
+        }
+        if (this.text) {
+            this.ctx.fillStyle = '#000';
+            this.ctx.font = '100px sans-serif';
+            const lines = this.text.split('\n');
+            const lineWidth = 0.6 * this.textureWidth; // Bisschen Platz rundrum lassen
+            var maxWidth = 0;
+            for (var line of lines) {
+                const measure = this.ctx.measureText(line);
+                if (measure.width > maxWidth) maxWidth = measure.width;
+            }
+            const scaledFontSize = lineWidth / maxWidth * 100;
+            this.ctx.font = scaledFontSize + 'px sans-serif';
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            const numberOfLines = lines.length;
+            const yOffset = this.textureHeight / 2 - (numberOfLines * scaledFontSize / 2) + (scaledFontSize / 2);
+            for (var i = 0; i < numberOfLines; i++) {
+                const line = lines[i];
+                var y = yOffset + (i * scaledFontSize);
+                this.ctx.fillText(line, this.textureWidth / 2, y);
+            }
+        }
+        this.material.map.needsUpdate = true;
     }
 }
 
