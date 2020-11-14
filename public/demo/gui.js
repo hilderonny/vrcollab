@@ -199,13 +199,13 @@ class GuiButton extends EventMesh {
         var borderDepth = 0.3;
         var buttonTilt = 0.05;
         var buttonHeight = 0.4;
-        this.buttonInset = 0.3;
-        this.buttonInsetPressed = 0.1;
+        this.buttonInset = -0.1;
+        this.buttonInsetPressed = -0.3;
         this.add(new Border(borderWidth, borderDepth));
         this.button = new Button(text, imageUrl, buttonTilt, buttonHeight);
         this.button.scale.multiplyScalar(1 - ( 2 * borderWidth));
-        this.button.position.x = .5;
-        this.button.position.y = -.5;
+        this.button.position.x = borderWidth;
+        this.button.position.y = -borderWidth;
         this.button.position.z = this.buttonInset;
         this.button.addEventListener(EventMesh.EventType.ButtonDown, () => {
             this.handleButtonDown();
