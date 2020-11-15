@@ -57,7 +57,7 @@ var init = function() {
     toggleButton.addEventListener(GuiButton.EventType.Released, function() {
         console.log('Toggle button released' , this);
     });
-    window.toggleButton = toggleButton;
+    window.toggleButton = toggleButton; // Zum Zugriff über die Konsole
     
     // Toggle Button Liste, bedingen sich gegenseitig
     var toggleButtonList = new GuiToggleButtonList();

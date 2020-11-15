@@ -144,6 +144,21 @@ class Border extends Mesh {
  */
 class Button extends EventMesh {
 
+    /**
+     * config = {
+     *  ambientColor = 0xeb3bff,
+     *  borderDepth = 1,
+     *  borderWidth = .1,
+     *  emissiveColor = 0x421048,
+     *  imageUrl = null,
+     *  objectHeight = 1,
+     *  objectWidth = 1,
+     *  text = null,
+     *  textureHeight = 512,
+     *  textureWidth = 512,
+     *  tilt = 0,
+     * }
+     */
     constructor(config) {
         super(new BufferGeometry(), new MeshPhongMaterial());
         this._ambientColor = 0xeb3bff;
@@ -306,6 +321,24 @@ class Button extends EventMesh {
  */
 class GuiButton extends EventMesh {
 
+    /**
+     * config = {
+     *  borderAmbientColor = 0xffeb3b,
+     *  borderEmissiveColor = 0x421048,
+     *  borderDepth = 1,
+     *  borderWidth = .1,
+     *  buttonAmbientColor = 0xeb3bff,
+     *  buttonEmissiveColor = 0x421048,
+     *  buttonHeight = .4,
+     *  buttonInset = -.1,
+     *  buttonInsetPressed = -.3,
+     *  buttonTilt = .1,
+     *  imageUrl = null,
+     *  objectHeight = 1,
+     *  objectWidth = 1,
+     *  text = null,
+     * }
+     */
     constructor(config) {
         super();
         this._border = new Border();
@@ -326,9 +359,19 @@ class GuiButton extends EventMesh {
         this.buttonInset = -0.1;
         this.buttonInsetPressed = -0.3;
         this.buttonTilt = 0.1;
+        this.objectHeight = 1;
+        this.objectWidth = 1;
         this.imageUrl = null;
         this.text = null;
         Object.assign(this, config);
+    }
+
+    set borderAmbientColor(value) {
+        this._border.ambientColor = value;
+    }
+
+    set borderEmissiveColor(value) {
+        this._border.emissiveColor = value;
     }
 
     set borderDepth(value) {
@@ -336,11 +379,17 @@ class GuiButton extends EventMesh {
     }
 
     set borderWidth(value) {
+        this._borderWidth = value;
         this._border.borderWidth = value;
-        const scale = 1 - ( 2 * value);
-        this._button.scale.set(scale, scale, scale);
-        this._button.position.x = value;
-        this._button.position.y = -value;
+        this.scaleButton();
+    }
+
+    set buttonAmbientColor(value) {
+        this._button.ambientColor = value;
+    }
+
+    set buttonEmissiveColor(value) {
+        this._button.emissiveColor = value;
     }
 
     set buttonHeight(value) {
@@ -369,6 +418,20 @@ class GuiButton extends EventMesh {
         this._button.imageUrl = value;
     }
 
+    set objectHeight(value) {
+        this._objectHeight = value;
+        this._border.objectHeight = value;
+        //this._button.objectHeight = value;
+        this.scaleButton();
+    }
+
+    set objectWidth(value) {
+        this._objectWidth = value;
+        this._border.objectWidth = value;
+        //this._button.objectWidth = value;
+        this.scaleButton();
+    }
+
     set text(value) {
         this._button.text = value;
     }
@@ -391,6 +454,13 @@ class GuiButton extends EventMesh {
             this._button.position.z = this._buttonInsetPressed;
             this.sendEvent(GuiButton.EventType.Pressed);
         }
+    }
+
+    scaleButton() {
+        console.log(this._objectWidth);
+        this._button.scale.set(this._objectWidth - ( 2 * this._borderWidth), this._objectHeight - ( 2 * this._borderWidth), 1);
+        this._button.position.x = this._borderWidth;
+        this._button.position.y = -this._borderWidth;
     }
 
 }
