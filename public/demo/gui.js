@@ -1,85 +1,141 @@
 import { BufferAttribute, BufferGeometry, CanvasTexture, CylinderBufferGeometry, Mesh, MeshPhongMaterial, Object3D, PlaneGeometry, TextureLoader } from '../js/lib/three.module.js';
 import { EventMesh } from './geometries.js';
 
+// constructor-Parameter: https://stackoverflow.com/a/52509813/12127220
+
 /**
  * Das ist der Rahmen eines GuiButtons.
  */
 class Border extends Mesh {
 
-    constructor(width, depth) {
-        super(
-            new BufferGeometry(),
-            new MeshPhongMaterial({ color: 0xffeb3b, emissive: 0x484210 })
-        );
+    /**
+     * config = {
+     *  ambientColor = 0xffeb3b,
+     *  borderDepth = 1,
+     *  borderWidth = .1,
+     *  emissiveColor = 0x484210,
+     *  objectHeight = 1,
+     *  objectWidth = 1,
+     * }
+     */
+    constructor(config) {
+        super(new BufferGeometry(), new MeshPhongMaterial());
+        this._ambientColor = 0xffeb3b;
+        this._borderDepth = 1;
+        this._borderWidth = .1;
+        this._emissiveColor = 0x484210;
+        this._objectHeight = 1;
+        this._objectWidth = 1;
+        Object.assign(this, config);
+        this.updateVertices();
+        this.updateMaterial();
+    }
+
+    updateMaterial() {
+        this.material.setValues({ color: this._ambientColor, emissive: this._emissiveColor });
+    }
+
+    updateVertices() {
+        const bw = this._borderWidth, bd = this._borderDepth, ow = this._objectWidth, oh = this._objectHeight;
         const vertices = new Float32Array([
-            0.0,  0.0, 0.0,                     // 0
-            width, -width, 0.0,                 // 2
-            1.0,  0.0, 0.0,                     // 1
+            0.0,  0.0, 0.0,        // 0
+            bw, -bw, 0.0,          // 2
+            ow,  0.0, 0.0,         // 1
 
-            width, -width, 0.0,                 // 2
-            1.0 - width, -width, 0.0,           // 3
-            1.0,  0.0, 0.0,                     // 1
+            bw, -bw, 0.0,          // 2
+            ow - bw, -bw, 0.0,     // 3
+            ow,  0.0, 0.0,         // 1
 
-            0.0,  0.0, 0.0,                     // 0
-            0.0, -1.0, 0.0,                     // 6
-            width, -width, 0.0,                 // 2
+            0.0,  0.0, 0.0,        // 0
+            0.0, -oh, 0.0,         // 6
+            bw, -bw, 0.0,          // 2
 
-            0.0, -1.0, 0.0,                     // 6
-            width, width - 1.0, 0.0,            // 4
-            width, -width, 0.0,                 // 2
+            0.0, -oh, 0.0,         // 6
+            bw, bw - oh, 0.0,      // 4
+            bw, -bw, 0.0,          // 2
 
-            0.0, -1.0, 0.0,                     // 6
-            1.0 - width, width - 1.0, 0.0,      // 5
-            width, width - 1.0, 0.0,            // 4
+            0.0, -oh, 0.0,         // 6
+            ow - bw, bw - oh, 0.0, // 5
+            bw, bw - oh, 0.0,      // 4
 
-            0.0, -1.0, 0.0,                     // 6
-            1.0, -1.0, 0.0,                     // 7
-            1.0 - width, width - 1.0, 0.0,      // 5
+            0.0, -oh, 0.0,         // 6
+            ow, -oh, 0.0,          // 7
+            ow - bw, bw - oh, 0.0, // 5
 
-            1.0 - width, width - 1.0, 0.0,      // 5
-            1.0,  0.0, 0.0,                     // 1
-            1.0 - width, -width, 0.0,           // 3
+            ow - bw, bw - oh, 0.0, // 5
+            ow,  0.0, 0.0,         // 1
+            ow - bw, -bw, 0.0,     // 3
 
-            1.0 - width, width - 1.0, 0.0,      // 5
-            1.0, -1.0, 0.0,                     // 7
-            1.0,  0.0, 0.0,                     // 1
+            ow - bw, bw - oh, 0.0, // 5
+            ow, -oh, 0.0,          // 7
+            ow,  0.0, 0.0,         // 1
 
 
-            width, -width, 0.0,                 // 2
-            width, -width, -depth,              // 8
-            1.0 - width, -width, 0.0,           // 3
+            bw, -bw, 0.0,          // 2
+            bw, -bw, -bd,          // 8
+            ow - bw, -bw, 0.0,     // 3
 
-            width, -width, -depth,              // 8
-            1.0 - width, -width, -depth,        // 9
-            1.0 - width, -width, 0.0,           // 3
+            bw, -bw, -bd,          // 8
+            ow - bw, -bw, -bd,     // 9
+            ow - bw, -bw, 0.0,     // 3
 
-            width, width - 1.0, 0.0,            // 4
-            width, width - 1.0, -depth,         // 10
-            width, -width, 0.0,                 // 2
+            bw, bw - oh, 0.0,      // 4
+            bw, bw - oh, -bd,      // 10
+            bw, -bw, 0.0,          // 2
 
-            width, width - 1.0, -depth,         // 10
-            width, -width, -depth,              // 8
-            width, -width, 0.0,                 // 2
+            bw, bw - oh, -bd,      // 10
+            bw, -bw, -bd,          // 8
+            bw, -bw, 0.0,          // 2
 
-            1.0 - width, width - 1.0, 0.0,      // 5
-            1.0 - width, width - 1.0, -depth,   // 11
-            width, width - 1.0, 0.0,            // 4
+            ow - bw, bw - oh, 0.0, // 5
+            ow - bw, bw - oh, -bd, // 11
+            bw, bw - oh, 0.0,      // 4
 
-            1.0 - width, width - 1.0, -depth,   // 11
-            width, width - 1.0, -depth,         // 10
-            width, width - 1.0, 0.0,            // 4
+            ow - bw, bw - oh, -bd, // 11
+            bw, bw - oh, -bd,      // 10
+            bw, bw - oh, 0.0,      // 4
 
-            1.0 - width, -width, 0.0,           // 3
-            1.0 - width, -width, -depth,        // 9
-            1.0 - width, width - 1.0, 0.0,      // 5
+            ow - bw, -bw, 0.0,     // 3
+            ow - bw, -bw, -bd,     // 9
+            ow - bw, bw - oh, 0.0, // 5
 
-            1.0 - width, -width, -depth,        // 9
-            1.0 - width, width - 1.0, -depth,   // 11
-            1.0 - width, width - 1.0, 0.0,      // 5
+            ow - bw, -bw, -bd,     // 9
+            ow - bw, bw - oh, -bd, // 11
+            ow - bw, bw - oh, 0.0, // 5
 
         ]);
         this.geometry.setAttribute('position', new BufferAttribute(vertices, 3));
         this.geometry.computeVertexNormals(); // Damit das Phong Material funktioniert, siehe https://stackoverflow.com/questions/47059946/buffergeometry-showing-up-as-black-with-phongmaterial
+    }
+
+    set ambientColor(value) {
+        this._ambientColor = value;
+        this.updateMaterial();
+    }
+
+    set borderDepth(value) {
+        this._borderDepth = value;
+        this.updateVertices();
+    }
+
+    set borderWidth(value) {
+        this._borderWidth = value;
+        this.updateVertices();
+    }
+
+    set emissiveColor(value) {
+        this._emissiveColor = value;
+        this.updateMaterial();
+    }
+
+    set objectHeight(value) {
+        this._objectHeight = value;
+        this.updateVertices();
+    }
+
+    set objectWidth(value) {
+        this._objectWidth = value;
+        this.updateVertices();
     }
 }
 
@@ -88,43 +144,23 @@ class Border extends Mesh {
  */
 class Button extends EventMesh {
 
-    constructor(text, imageUrl, width, depth) {
-        super(
-            new BufferGeometry(),
-            new MeshPhongMaterial(
-                { color: 0xeb3bff, emissive: 0x421048 }
-            )
-        );
-        this.text = text;
-        this.imageUrl = imageUrl;
-        this.textureWidth = 512;
-        this.textureHeight = 512;
-        this.ctx = document.createElement('canvas').getContext('2d');
-        this.ctx.canvas.width = this.textureWidth;
-        this.ctx.canvas.height = this.textureHeight;
-        const texture = new CanvasTexture(this.ctx.canvas);;
+    constructor(config) {
+        super(new BufferGeometry(), new MeshPhongMaterial());
+        this._ambientColor = 0xeb3bff;
+        this._emissiveColor = 0x421048;
+        this._imageUrl = null;
+        this._objectDepth = 1;
+        this._objectHeight = 1;
+        this._objectWidth = 1;
+        this._text = null;
+        this._textureHeight = 512;
+        this._textureWidth = 512;
+        this._tilt = 0;
+        this._ctx = document.createElement('canvas').getContext('2d');
+        const texture = new CanvasTexture(this._ctx.canvas);;
         this.material.map = texture;
         this.material.bumpMap = texture;
-        this.material.bumpScale = 0.005;
-        if (imageUrl) {
-            this.image = new Image(this.textureWidth, this.textureHeight);
-            this.image.onload = () => {
-                this.repaint();
-            }
-            this.image.src = imageUrl;
-        } else {
-            this.repaint();
-        }
-        const vertices = new Float32Array([
-            0.0,  0.0, 0.0,                 
-            1.0,  0.0, 0.0,                 
-            width, -width, depth,           
-            1.0 - width, -width, depth,     
-            width, width - 1.0, depth,      
-            1.0 - width, width - 1.0, depth,
-            0.0, -1.0, 0.0,                 
-            1.0, -1.0, 0.0,                 
-        ]);
+        this.material.bumpScale = .005;
         const uvcoords = new Float32Array([
             0.0, 1.0,
             1.0, 1.0,
@@ -149,38 +185,115 @@ class Button extends EventMesh {
             2, 4, 3,
             4, 5, 3,
         ];
-        this.geometry.setAttribute( 'position', new BufferAttribute( vertices, 3 ) );
         this.geometry.setAttribute( 'uv', new BufferAttribute( uvcoords, 2 ) );
         this.geometry.setIndex(indices);
+        Object.assign(this, config);
+        this.updateVertices();
+        this.updateMaterial();
+        this.repaint();
+    }
+
+    set ambientColor(value) {
+        this._ambientColor = value;
+        this.updateMaterial();
+    }
+
+    set bumpScale(value) {
+        this.material.bumpScale = value;
+        this.repaint();
+    }
+
+    set emissiveColor(value) {
+        this._emissiveColor = value;
+        this.updateMaterial();
+    }
+
+    set imageUrl(value) {
+        if (!value) {
+            this._image = null;
+            this.repaint(); //  Clear image
+        } else {
+            this._image = new Image(this._textureWidth, this._textureHeight);
+            this._image.onload = () => {
+                this.repaint();
+            }
+            this._image.src = value;
+        }
+    }
+
+    set objectDepth(value) {
+        this._objectDepth = value;
+        this.updateVertices();
+    }
+
+    set objectHeight(value) {
+        this._objectHeight = value;
+        this.updateVertices();
+    }
+
+    set objectWidth(value) {
+        this._objectWidth = value;
+        this.updateVertices();
+    }
+
+    set text(value) {
+        this._text = value;
+        this.repaint();
+    }
+
+    set tilt(value) {
+        this._tilt = value;
+        this.updateVertices();
+    }
+
+    updateMaterial() {
+        this.material.setValues({ color: this._ambientColor, emissive: this._emissiveColor });
+    }
+
+    updateVertices() {
+        const ow = this._objectWidth, od = this._objectDepth, oh = this._objectHeight, t = this._tilt;
+        const vertices = new Float32Array([
+            0.0,  0.0, 0.0,
+            ow,  0.0, 0.0,
+            t, -t, od,
+            ow - t, -t, od,
+            t, t - oh, od,
+            ow - t, t - oh, od,
+            0.0, -oh, 0.0,
+            ow, -oh, 0.0,
+        ]);
+        this.geometry.setAttribute( 'position', new BufferAttribute( vertices, 3 ) );
         this.geometry.computeVertexNormals(); // Damit das Phong Material funktioniert, siehe https://stackoverflow.com/questions/47059946/buffergeometry-showing-up-as-black-with-phongmaterial
     }
 
     repaint() {
-        this.ctx.fillStyle = '#FFF';
-        this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-        if (this.image) {
-            this.ctx.drawImage(this.image, 0, 0, this.image.width, this.image.height);
+        this._ctx.canvas.width = this._textureWidth;
+        this._ctx.canvas.height = this._textureHeight;
+        this._ctx.fillStyle = '#FFF';
+        this._ctx.fillRect(0, 0, this._ctx.canvas.width, this._ctx.canvas.height);
+        if (this._image) {
+            this._ctx.drawImage(this._image, 0, 0, this._image.width, this._image.height);
         }
-        if (this.text) {
-            this.ctx.fillStyle = '#000';
-            this.ctx.font = '100px sans-serif';
-            const lines = this.text.split('\n');
-            const lineWidth = 0.6 * this.textureWidth; // Bisschen Platz rundrum lassen
+        if (this._text) {
+            this._ctx.fillStyle = '#000';
+            this._ctx.font = '100px sans-serif';
+            const lines = this._text.split('\n');
+            const lineWidth = 0.6 * this._textureWidth; // Bisschen Platz rundrum lassen
             var maxWidth = 0;
             for (var line of lines) {
-                const measure = this.ctx.measureText(line);
+                const measure = this._ctx.measureText(line);
                 if (measure.width > maxWidth) maxWidth = measure.width;
             }
             const scaledFontSize = lineWidth / maxWidth * 100;
-            this.ctx.font = scaledFontSize + 'px sans-serif';
-            this.ctx.textAlign = 'center';
-            this.ctx.textBaseline = 'middle';
+            this._ctx.font = scaledFontSize + 'px sans-serif';
+            this._ctx.textAlign = 'center';
+            this._ctx.textBaseline = 'middle';
             const numberOfLines = lines.length;
-            const yOffset = this.textureHeight / 2 - (numberOfLines * scaledFontSize / 2) + (scaledFontSize / 2);
+            const yOffset = this._textureHeight / 2 - (numberOfLines * scaledFontSize / 2) + (scaledFontSize / 2);
             for (var i = 0; i < numberOfLines; i++) {
                 const line = lines[i];
                 var y = yOffset + (i * scaledFontSize);
-                this.ctx.fillText(line, this.textureWidth / 2, y);
+                this._ctx.fillText(line, this._textureWidth / 2, y);
             }
         }
         this.material.map.needsUpdate = true;
@@ -193,28 +306,71 @@ class Button extends EventMesh {
  */
 class GuiButton extends EventMesh {
 
-    constructor(text, imageUrl) {
+    constructor(config) {
         super();
-        var borderWidth = 0.1;
-        var borderDepth = 0.3;
-        var buttonTilt = 0.05;
-        var buttonHeight = 0.4;
-        this.buttonInset = -0.1;
-        this.buttonInsetPressed = -0.3;
-        this.add(new Border(borderWidth, borderDepth));
-        this.button = new Button(text, imageUrl, buttonTilt, buttonHeight);
-        this.button.scale.multiplyScalar(1 - ( 2 * borderWidth));
-        this.button.position.x = borderWidth;
-        this.button.position.y = -borderWidth;
-        this.button.position.z = this.buttonInset;
-        this.button.addEventListener(EventMesh.EventType.ButtonDown, () => {
+        this._border = new Border();
+        this.add(this._border);
+        this._button = new Button();
+        this._button.addEventListener(EventMesh.EventType.ButtonDown, () => {
             this.handleButtonDown();
         });
-        this.button.addEventListener(EventMesh.EventType.ButtonUp, () => {
+        this._button.addEventListener(EventMesh.EventType.ButtonUp, () => {
             this.handleButtonUp();
         });
-        this.button.enableForRayCaster = true;
-        this.add(this.button);
+        this._button.enableForRayCaster = true;
+        this.add(this._button);
+
+        this.borderDepth = 0.3;
+        this.borderWidth = 0.1;
+        this.buttonHeight = 0.4;
+        this.buttonInset = -0.1;
+        this.buttonInsetPressed = -0.3;
+        this.buttonTilt = 0.1;
+        this.imageUrl = null;
+        this.text = null;
+        Object.assign(this, config);
+    }
+
+    set borderDepth(value) {
+        this._border.borderDepth = value;
+    }
+
+    set borderWidth(value) {
+        this._border.borderWidth = value;
+        const scale = 1 - ( 2 * value);
+        this._button.scale.set(scale, scale, scale);
+        this._button.position.x = value;
+        this._button.position.y = -value;
+    }
+
+    set buttonHeight(value) {
+        this._button.objectDepth = value;
+    }
+
+    set buttonInset(value) {
+        this._buttonInset = value;
+        if (!this._isCurrentlyPressed) {
+            this._button.position.z = this._buttonInset;
+        }
+    }
+
+    set buttonInsetPressed(value) {
+        this._buttonInsetPressed = value;
+        if (this._isCurrentlyPressed) {
+            this._button.position.z = this._buttonInsetPressed;
+        }
+    }
+
+    set buttonTilt(value) {
+        this._button.tilt = value;
+    }
+
+    set imageUrl(value) {
+        this._button.imageUrl = value;
+    }
+
+    set text(value) {
+        this._button.text = value;
     }
 
     handleButtonDown() {
@@ -226,12 +382,13 @@ class GuiButton extends EventMesh {
     }
 
     setPressed(pressed) {
-        var isCurrentlyPressed = this.button.position.z === this.buttonInsetPressed;
-        if (isCurrentlyPressed && !pressed) {
-            this.button.position.z = this.buttonInset;
+        console.log(pressed, this._isCurrentlyPressed, this._button.position.z, this._buttonInset, this._buttonInsetPressed)
+        this._isCurrentlyPressed = this._button.position.z === this._buttonInsetPressed;
+        if (this._isCurrentlyPressed && !pressed) {
+            this._button.position.z = this._buttonInset;
             this.sendEvent(GuiButton.EventType.Released);
-        } else if (!isCurrentlyPressed && pressed) {
-            this.button.position.z = this.buttonInsetPressed;
+        } else if (!this._isCurrentlyPressed && pressed) {
+            this._button.position.z = this._buttonInsetPressed;
             this.sendEvent(GuiButton.EventType.Pressed);
         }
     }
@@ -255,25 +412,25 @@ GuiButton.EventType = {
  */
 class GuiToggleButton extends GuiButton {
 
-    constructor(text, imageUrl) {
-        super(text, imageUrl);
-        this.shouldHandleUp = false;
+    constructor(config) {
+        super(config);
+        this._shouldHandleUp = false;
     }
 
     handleButtonDown() {
-        if (this.button.position.z === this.buttonInset) {
+        if (this._button.position.z === this._buttonInset) {
             this.setPressed(true);
-            this.shouldHandleUp = false;
+            this._shouldHandleUp = false;
         } else {
-            this.shouldHandleUp = true;
+            this._shouldHandleUp = true;
         }
     }
 
     handleButtonUp() {
-        if (!this.shouldHandleUp) return;
-        if (this.button.position.z === this.buttonInsetPressed) {
+        if (!this._shouldHandleUp) return;
+        if (this._button.position.z === this._buttonInsetPressed) {
             this.setPressed(false);
-            this.shouldHandleUp = false;
+            this._shouldHandleUp = false;
         }
     }
 }

@@ -48,7 +48,7 @@ var init = function() {
     });
     
     // Einzelner Toggle-Button
-	var toggleButton = new GuiToggleButton('Hallo\nDu\nOber\nTolle Welt!', '/images/texturtest.png');
+	var toggleButton = new GuiToggleButton({ text: 'Hallo\nDu\nOber\nTolle Welt!', imageUrl: '/images/texturtest.png' });
     toggleButton.position.copy(new Vector3( .5, 2, -2 ));
     environment.scene.add(toggleButton);
     toggleButton.addEventListener(GuiButton.EventType.Pressed, function() {
@@ -57,6 +57,7 @@ var init = function() {
     toggleButton.addEventListener(GuiButton.EventType.Released, function() {
         console.log('Toggle button released' , this);
     });
+    window.toggleButton = toggleButton;
     
     // Toggle Button Liste, bedingen sich gegenseitig
     var toggleButtonList = new GuiToggleButtonList();
