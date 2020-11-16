@@ -6,12 +6,12 @@
         <link rel="stylesheet" href="vr.css"/>
         <script type="module">
 
-import { Vector3, WebGLRenderer } from '../js/lib/three.module.js';
+import { WebGLRenderer } from '../js/lib/three.module.js';
 import environment from './environment.js';
 import camera from './camera.js';
 import controls from './controls.js';
 import { LogPanel } from './geometries.js';
-import { GuiButton, GuiToggleButton, GuiToggleButtonList } from './gui.js';
+import { GuiButton, GuiTextOutput, GuiToggleButton, GuiToggleButtonList } from './gui.js';
 
 var renderer = new WebGLRenderer();
 document.body.appendChild(renderer.domElement);
@@ -38,7 +38,7 @@ var init = function() {
     
     // Einzelner normaler Button
 	var guiButton = new GuiButton();
-    guiButton.position.copy(new Vector3( -.5, 2, -2 ));
+    guiButton.position.set( -.5, 2, -2 );
     environment.scene.add(guiButton);
     guiButton.addEventListener(GuiButton.EventType.Pressed, function() {
         console.log('Button pressed' , this);
@@ -49,7 +49,7 @@ var init = function() {
     
     // Einzelner Toggle-Button
 	var toggleButton = new GuiToggleButton({ text: 'Hallo\nDu\nOber\nTolle Welt!', imageUrl: '/images/texturtest.png' });
-    toggleButton.position.copy(new Vector3( .5, 2, -2 ));
+    toggleButton.position.set( .5, 2, -2 );
     environment.scene.add(toggleButton);
     toggleButton.addEventListener(GuiButton.EventType.Pressed, function() {
         console.log('Toggle button pressed' , this);
@@ -61,11 +61,11 @@ var init = function() {
     
     // Toggle Button Liste, bedingen sich gegenseitig
     var toggleButtonList = new GuiToggleButtonList();
-    toggleButtonList.position.copy(new Vector3( -.5, 3, -2 ));
+    toggleButtonList.position.set( -.5, 4, -2 );
     environment.scene.add(toggleButtonList);
     for (var i = 0; i < 3; i++) {
         var listButton = new GuiToggleButton();
-        listButton.position.copy(new Vector3( i, 0, 0 ));
+        listButton.position.set( i, 0, 0 );
         listButton.index = i; // Für Zugriff in Event Listener
         listButton.addEventListener(GuiButton.EventType.Pressed, function() {
             console.log('Pressed', this.index, this); // this zeigt hier auf den Button
@@ -75,6 +75,28 @@ var init = function() {
         });
         toggleButtonList.addToggleButton(listButton);
     }
+
+    // Textausgabefelder
+    var textOutput = new GuiTextOutput({ fontSize: .1, padding: .1 });
+    textOutput.position.set( 1.5, 2, -2 );
+    environment.scene.add(textOutput);
+    var centerTextOutput = new GuiTextOutput({ fontSize: .1, padding: .1, center: true });
+    centerTextOutput.position.set( 1.5, 3, -2 );
+    environment.scene.add(centerTextOutput);
+    setInterval(() => {
+        let text = Date.now() + '\n\n' + new Date();
+        textOutput.text = text;
+        centerTextOutput.text = new Date();
+    }, 100);
+    var loremOutput = new GuiTextOutput({
+        fontSize: .1, 
+        padding: .05, 
+        text: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.',
+        objectWidth: 3,
+        objectHeight: 2,
+    });
+    loremOutput.position.set( -3.5, 4, -2 );
+    environment.scene.add(loremOutput);
 };
 
 window.addEventListener('DOMContentLoaded', async function() {

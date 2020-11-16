@@ -476,6 +476,166 @@ GuiButton.EventType = {
     Released: 'guibuttonreleased',
 };
 
+class GuiTextOutput extends Mesh {
+
+    /**
+     * config = {
+     *  ambientColor = 0xffeb3b,
+     *  bumpScale = 0,
+     *  center = false,
+     *  emissiveColor = 0x484210,
+     *  fontSize = .5,
+     *  objectHeight = 1,
+     *  objectWidth = 1,
+     *  padding = 0,
+     *  text = null,
+     *  textureHeight = 512,
+     *  textureWidth = 512,
+     * }
+     */
+    constructor(config) {
+        super(new BufferGeometry(), new MeshPhongMaterial());
+        this._ambientColor = 0xffeb3b;
+        this._center = false;
+        this._emissiveColor = 0x484210;
+        this._fontSize = .5; // Relativ zur Objekthöhe
+        this._objectHeight = 1;
+        this._objectWidth = 1;
+        this._padding = 0;
+        this._text = null;
+        this._textureHeight = 512;
+        this._textureWidth = 512;
+        this._ctx = document.createElement('canvas').getContext('2d');
+        const texture = new CanvasTexture(this._ctx.canvas);;
+        this.material.map = texture;
+        this.material.bumpMap = texture;
+        this.material.bumpScale = 0;
+        const uvcoords = new Float32Array([
+            0.0, 1.0,
+            1.0, 1.0,
+            0.0, 0.0,
+            1.0, 0.0,
+        ]);
+        const indices = [
+            0, 2, 1,
+            3, 1, 2,
+        ];
+        this.geometry.setAttribute( 'uv', new BufferAttribute( uvcoords, 2 ) );
+        this.geometry.setIndex(indices);
+        Object.assign(this, config);
+        this.updateVertices();
+        this.updateMaterial();
+        this.repaint();
+    }
+
+    set ambientColor(value) {
+        this._ambientColor = value;
+        this.updateMaterial();
+    }
+
+    set bumpScale(value) {
+        this.material.bumpScale = value;
+        this.repaint();
+    }
+
+    set center(value) {
+        this._center = value;
+        this.repaint();
+    }
+
+    set emissiveColor(value) {
+        this._emissiveColor = value;
+        this.updateMaterial();
+    }
+
+    set fontSize(value) {
+        this._fontSize = value;
+        this.repaint();
+    }
+
+    set objectHeight(value) {
+        this._objectHeight = value;
+        this.updateVertices();
+    }
+
+    set objectWidth(value) {
+        this._objectWidth = value;
+        this.updateVertices();
+    }
+
+    set padding(value) {
+        this._padding = value;
+        this.repaint();
+    }
+
+    set text(value) {
+        this._text = '' + value;
+        this.repaint();
+    }
+
+    updateMaterial() {
+        this.material.setValues({ color: this._ambientColor, emissive: this._emissiveColor });
+    }
+
+    updateVertices() {
+        const ow = this._objectWidth, oh = this._objectHeight;
+        const vertices = new Float32Array([
+            0.0,  0.0, 0.0,
+            ow,  0.0, 0.0,
+            0.0, -oh, 0.0,
+            ow, -oh, 0.0,
+        ]);
+        this.geometry.setAttribute( 'position', new BufferAttribute( vertices, 3 ) );
+        this.geometry.computeVertexNormals();
+    }
+
+    repaint() {
+        let textureWidth = this._textureWidth * this._objectWidth;
+        let textureHeight = this._textureHeight * this._objectHeight;
+        this._ctx.canvas.width = textureWidth;
+        this._ctx.canvas.height = textureHeight;
+        this._ctx.fillStyle = '#FFF';
+        this._ctx.fillRect(0, 0, textureWidth, textureHeight);
+        if (this._text) {
+            this._ctx.fillStyle = '#000';
+            let fontSizeInPixels = textureHeight * this._fontSize;
+            let maxWidth = textureWidth * (1 - 2 * this._padding);
+            let maxHeight = textureHeight * (1 - 2 * this._padding);
+            this._ctx.font = fontSizeInPixels + 'px sans-serif';
+            if (this._center) this._ctx.textAlign = 'center';
+            this._ctx.textBaseline = this._center ? 'middle' : 'top';
+            const lines = this._text.split('\n');
+            const realLines = [];
+            for (let line of lines) {
+                const words = line.split(' ');
+                if (words.length < 1) continue;
+                let fullLine = words[0];
+                for (let i = 1; i < words.length; i++) {
+                    if (this._ctx.measureText(fullLine + ' ' + words[i]).width > maxWidth) {
+                        realLines.push(fullLine);
+                        if ((realLines.length + 1) * fontSizeInPixels > maxHeight) break;
+                        fullLine = words[i];
+                    } else {
+                        fullLine += ' ' + words[i];
+                    }
+                }
+                if ((realLines.length + 1) * fontSizeInPixels > maxHeight) break;
+                realLines.push(fullLine);
+            }
+            const numberOfLines = realLines.length;
+            const paddingX = this._padding * textureWidth;
+            const paddingY = this._padding * textureHeight;
+            const x = this._center ? textureWidth / 2 : paddingX;
+            const y = this._center ? (textureHeight - (numberOfLines - 1) * fontSizeInPixels) / 2 : paddingY;
+            for (let i = 0; i < numberOfLines; i++) {
+                const line = realLines[i];
+                this._ctx.fillText(line, x, y + i * fontSizeInPixels);
+            }
+        }
+        this.material.map.needsUpdate = true;
+    }
+}
+
 /**
  * Umschalter-Button. Wenn man den drückt, bleibt er drin.
  * Drückt man nochmal, kommt er wieder raus.
@@ -530,4 +690,4 @@ class GuiToggleButtonList extends Object3D {
 
 }
 
-export { GuiButton, GuiToggleButton, GuiToggleButtonList }
+export { GuiButton, GuiTextOutput, GuiToggleButton, GuiToggleButtonList }
