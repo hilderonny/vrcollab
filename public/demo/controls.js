@@ -91,6 +91,7 @@ var mobileControls = {
     init: function(renderer) {
         var startX, startY;
         this.touchVector = new Vector2();
+        this.touchDownHandled = true; // Beim Laden soll kein Touch-Event erfolgen
         renderer.domElement.addEventListener('touchstart', (event) => {
             event.preventDefault();
             var touchPoint = event.touches[0];
@@ -98,9 +99,8 @@ var mobileControls = {
 	        this.touchVector.y = - ( touchPoint.clientY / window.innerHeight ) * 2 + 1;
             startX = touchPoint.clientX;
             startY = touchPoint.clientY;
-            if (this.intersection) {
-                this.intersection.object.sendEvent(EventMesh.EventType.ButtonDown, EventMesh.ButtonCode.TouchScreen, this.intersection.point);
-            }
+            this.touchDownHandled = false; // Wird in Update-Loop abgefrühstückt
+            this.intersection = null;
         }, false);
         renderer.domElement.addEventListener('touchmove', (event) => {
             event.preventDefault();
@@ -124,7 +124,12 @@ var mobileControls = {
         }, false);
     },
 
-    update: function() {},
+    update: function() {
+        if (!this.touchDownHandled && this.intersection) {
+            this.intersection.object.sendEvent(EventMesh.EventType.ButtonDown, EventMesh.ButtonCode.TouchScreen, this.intersection.point);
+            this.touchDownHandled = true;
+        }
+    },
 
     updateRaycaster: function(raycaster) {
         raycaster.setFromCamera( this.touchVector, camera.cam3 );

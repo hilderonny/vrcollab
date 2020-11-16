@@ -457,7 +457,6 @@ class GuiButton extends EventMesh {
     }
 
     scaleButton() {
-        console.log(this._objectWidth);
         this._button.scale.set(this._objectWidth - ( 2 * this._borderWidth), this._objectHeight - ( 2 * this._borderWidth), 1);
         this._button.position.x = this._borderWidth;
         this._button.position.y = -this._borderWidth;
