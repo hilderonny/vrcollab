@@ -21,7 +21,7 @@ window.addEventListener('resize', resize);
 var init = function() {
     environment.init();
     camera.init();
-    controls.init(renderer);
+    controls.init(renderer, true);
     var logPanel = new LogPanel(30, 20, 80, 25, '#004', '#6f6');
     logPanel.position.z = -30;
     logPanel.position.y = 10;

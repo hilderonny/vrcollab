@@ -1,4 +1,4 @@
-import { BufferAttribute, BufferGeometry, CanvasTexture, CylinderBufferGeometry, Mesh, MeshPhongMaterial, Object3D, PlaneGeometry, TextureLoader } from '../js/lib/three.module.js';
+import { BufferAttribute, BufferGeometry, CanvasTexture, Mesh, MeshPhongMaterial, Object3D } from '../js/lib/three.module.js';
 import { EventMesh } from './geometries.js';
 
 // constructor-Parameter: https://stackoverflow.com/a/52509813/12127220
@@ -299,7 +299,8 @@ class Button extends EventMesh {
                 const measure = this._ctx.measureText(line);
                 if (measure.width > maxWidth) maxWidth = measure.width;
             }
-            const scaledFontSize = lineWidth / maxWidth * 100;
+            let scaledFontSize = lineWidth / maxWidth * 100;
+            if (scaledFontSize > 0.6 * this._textureHeight) scaledFontSize = 0.6 * this._textureHeight; // Einzelne Buchstaben sind sonst zu hoch
             this._ctx.font = scaledFontSize + 'px sans-serif';
             this._ctx.textAlign = 'center';
             this._ctx.textBaseline = 'middle';
@@ -438,14 +439,15 @@ class GuiButton extends EventMesh {
 
     handleButtonDown() {
         this.setPressed(true);
+        this.sendEvent(EventMesh.EventType.ButtonDown, this);
     }
 
     handleButtonUp() {
         this.setPressed(false);
+        this.sendEvent(EventMesh.EventType.ButtonUp, this);
     }
 
     setPressed(pressed) {
-        console.log(pressed, this._isCurrentlyPressed, this._button.position.z, this._buttonInset, this._buttonInsetPressed)
         this._isCurrentlyPressed = this._button.position.z === this._buttonInsetPressed;
         if (this._isCurrentlyPressed && !pressed) {
             this._button.position.z = this._buttonInset;

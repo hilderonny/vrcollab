@@ -365,7 +365,7 @@ var controls = {
     pointerSphere: null,
     raycaster: null,
 
-    init: function(renderer) {
+    init: function(renderer, usePointerSphere) {
         var deviceType = 'desktop';
         if (navigator.appVersion.indexOf('OculusBrowser') >= 0 /*|| (navigator.appVersion.indexOf('Windows') >= 0 && navigator.xr) || (navigator.appVersion.indexOf('Mac OS X') >= 0 && navigator.xr)*/) {
             deviceType = 'xr';
@@ -384,12 +384,14 @@ var controls = {
             case 'xr': this.controlsInstance = xrControls; break;
         }
         this.controlsInstance.init(renderer);
-        this.pointerSphere = new Mesh(
-            new SphereGeometry(.1),
-            new MeshBasicMaterial({ color: 0xff0000 })
-        );
-        this.pointerSphere.visible = false;
-        environment.scene.add(this.pointerSphere);
+        if (usePointerSphere) {
+            this.pointerSphere = new Mesh(
+                new SphereGeometry(.1),
+                new MeshBasicMaterial({ color: 0xff0000 })
+            );
+            this.pointerSphere.visible = false;
+            environment.scene.add(this.pointerSphere);
+        }
         this.raycaster = new Raycaster();
         this.raycaster.near = .1;
         this.raycaster.far = 20;
@@ -404,13 +406,17 @@ var controls = {
                 var alreadyIntersected = this.intersection && (this.intersection.object === intersects[0].object);
                 if (this.intersection && !alreadyIntersected) this.intersection.object.sendEvent(EventMesh.EventType.PointerLeave);
                 this.intersection = intersects[0];
-                this.pointerSphere.visible = true;
-                this.pointerSphere.position.copy(this.intersection.point);
+                if (this.pointerSphere) {
+                    this.pointerSphere.visible = true;
+                    this.pointerSphere.position.copy(this.intersection.point);
+                }
                 if (!alreadyIntersected) this.intersection.object.sendEvent(EventMesh.EventType.PointerEnter);
             } else {
                 if (this.intersection) this.intersection.object.sendEvent(EventMesh.EventType.PointerLeave);
                 this.intersection = null;
-                this.pointerSphere.visible = false;
+                if (this.pointerSphere) {
+                    this.pointerSphere.visible = false;
+                }
             }
             this.controlsInstance.intersection = this.intersection;
         }

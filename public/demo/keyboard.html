@@ -11,7 +11,7 @@ import environment from './environment.js';
 import camera from './camera.js';
 import controls from './controls.js';
 import { LogPanel } from './geometries.js';
-import { GuiButton, GuiTextOutput, GuiToggleButton, GuiToggleButtonList } from './gui.js';
+import { Keyboard } from './keyboard.js';
 
 var renderer = new WebGLRenderer();
 document.body.appendChild(renderer.domElement);
@@ -28,75 +28,19 @@ window.addEventListener('resize', resize);
 var init = function() {
     environment.init();
     camera.init();
-    controls.init(renderer);
+    controls.init(renderer, false);
     var logPanel = new LogPanel(30, 20, 80, 25, '#004', '#6f6');
     logPanel.position.x = 20;
     logPanel.position.y = 10;
     logPanel.position.z = -30;
-	environment.scene.add(logPanel);
-    // GUI Panel
+    environment.scene.add(logPanel);
     
-    // Einzelner normaler Button
-	var guiButton = new GuiButton();
-    guiButton.position.set( -.5, 2, -2 );
-    environment.scene.add(guiButton);
-    guiButton.addEventListener(GuiButton.EventType.Pressed, function() {
-        console.log('Button pressed' , this);
-    });
-    guiButton.addEventListener(GuiButton.EventType.Released, function() {
-        console.log('Button released' , this);
-    });
-    
-    // Einzelner Toggle-Button
-	var toggleButton = new GuiToggleButton({ text: 'Hallo\nDu\nOber\nTolle Welt!', imageUrl: '/images/texturtest.png' });
-    toggleButton.position.set( .5, 2, -2 );
-    environment.scene.add(toggleButton);
-    toggleButton.addEventListener(GuiButton.EventType.Pressed, function() {
-        console.log('Toggle button pressed' , this);
-    });
-    toggleButton.addEventListener(GuiButton.EventType.Released, function() {
-        console.log('Toggle button released' , this);
-    });
-    window.toggleButton = toggleButton; // Zum Zugriff über die Konsole
-    
-    // Toggle Button Liste, bedingen sich gegenseitig
-    var toggleButtonList = new GuiToggleButtonList();
-    toggleButtonList.position.set( -.5, 4, -2 );
-    environment.scene.add(toggleButtonList);
-    for (var i = 0; i < 3; i++) {
-        var listButton = new GuiToggleButton();
-        listButton.position.set( i, 0, 0 );
-        listButton.index = i; // Für Zugriff in Event Listener
-        listButton.addEventListener(GuiButton.EventType.Pressed, function() {
-            console.log('Pressed', this.index, this); // this zeigt hier auf den Button
-        });
-        listButton.addEventListener(GuiButton.EventType.Released, function() {
-            console.log('Released', this.index, this); // this zeigt hier auf den Button
-        });
-        toggleButtonList.addToggleButton(listButton);
-    }
+    // Tastatur
+    var keyboard = new Keyboard();
+    keyboard.position.set(-.2, 1.6, -.2);
+    keyboard.scale.set(.02, .02, .02);
+    environment.scene.add(keyboard);
 
-    // Textausgabefelder
-    var textOutput = new GuiTextOutput({ fontSize: .1, padding: .1 });
-    textOutput.position.set( 1.5, 2, -2 );
-    environment.scene.add(textOutput);
-    var centerTextOutput = new GuiTextOutput({ fontSize: .1, padding: .1, center: true });
-    centerTextOutput.position.set( 1.5, 3, -2 );
-    environment.scene.add(centerTextOutput);
-    setInterval(() => {
-        let text = Date.now() + '\n\n' + new Date();
-        textOutput.text = text;
-        centerTextOutput.text = new Date();
-    }, 100);
-    var loremOutput = new GuiTextOutput({
-        fontSize: .1, 
-        padding: .05, 
-        text: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.',
-        objectWidth: 3,
-        objectHeight: 2,
-    });
-    loremOutput.position.set( -3.5, 4, -2 );
-    environment.scene.add(loremOutput);
 };
 
 window.addEventListener('DOMContentLoaded', async function() {
