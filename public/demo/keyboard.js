@@ -112,6 +112,7 @@ const keys = [
  * - buttonHeight = .4,
  * - buttonInset = -.1,
  * - buttonInsetPressed = -.3,
+ * - buttonTextColor = '#000',
  * - buttonTilt = .1,
  * 
  * Events:
@@ -137,18 +138,19 @@ class Keyboard extends EventMesh {
                     text: (key.label ? key.label : key.value),
                     objectWidth: width,
                     textureWidth: width * 512,
-                    borderAmbientColor: '#ccc',
+                    borderAmbientColor: '#333', // #ccc
                     borderEmissiveColor: '#000',
-                    buttonAmbientColor: '#fff',
+                    buttonAmbientColor: '#600', // #fff
                     buttonEmissiveColor: '#000',
                     buttonHeight: .2,
                     buttonInset: -.05,
                     buttonInsetPressed: -.15,
                     borderDepth: .15,
-                    buttonTilt: .04
+                    buttonTilt: .04,
                 });
                 button.key = key;
-                button._button.bumpScale = -.0002;
+                button._button.bumpScale = .0002;
+                button._button.textColor = '#fd0';
                 if (key.value === 'SHIFT') {
                     this._shiftButtons.push(button);
                     button.addEventListener(GuiButton.EventType.Pressed, () => {
@@ -211,6 +213,7 @@ class Keyboard extends EventMesh {
     set buttonHeight(value) { this._buttons.forEach(b => b.buttonHeight = value); }
     set buttonInset(value) { this._buttons.forEach(b => b.buttonInset = value); }
     set buttonInsetPressed(value) { this._buttons.forEach(b => b.buttonInsetPressed = value); }
+    set buttonTextColor(value) { this._buttons.forEach(b => b._button.textColor = value); }
     set buttonTilt(value) { this._buttons.forEach(b => b.buttonTilt = value); }
    
 }

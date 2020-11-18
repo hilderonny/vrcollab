@@ -1,4 +1,4 @@
-import { BufferAttribute, BufferGeometry, CanvasTexture, Mesh, MeshPhongMaterial, Object3D } from '../js/lib/three.module.js';
+import { BufferAttribute, BufferGeometry, CanvasTexture, Mesh, MeshBasicMaterial, MeshPhongMaterial, Object3D, Texture } from '../js/lib/three.module.js';
 import { EventMesh } from './geometries.js';
 
 // constructor-Parameter: https://stackoverflow.com/a/52509813/12127220
@@ -154,6 +154,7 @@ class Button extends EventMesh {
      *  objectHeight = 1,
      *  objectWidth = 1,
      *  text = null,
+     *  textColor = '#000',
      *  textureHeight = 512,
      *  textureWidth = 512,
      *  tilt = 0,
@@ -168,11 +169,12 @@ class Button extends EventMesh {
         this._objectHeight = 1;
         this._objectWidth = 1;
         this._text = null;
+        this._textColor = '#000';
         this._textureHeight = 512;
         this._textureWidth = 512;
         this._tilt = 0;
         this._ctx = document.createElement('canvas').getContext('2d');
-        const texture = new CanvasTexture(this._ctx.canvas);;
+        const texture = new Texture(this._ctx.canvas);
         this.material.map = texture;
         this.material.bumpMap = texture;
         this.material.bumpScale = .005;
@@ -210,7 +212,8 @@ class Button extends EventMesh {
 
     set ambientColor(value) {
         this._ambientColor = value;
-        this.updateMaterial();
+        //this.updateMaterial();
+        this.repaint();
     }
 
     set bumpScale(value) {
@@ -256,13 +259,20 @@ class Button extends EventMesh {
         this.repaint();
     }
 
+    set textColor(value) {
+        this._textColor = value;
+        this.repaint();
+    }
+
     set tilt(value) {
         this._tilt = value;
         this.updateVertices();
     }
 
     updateMaterial() {
-        this.material.setValues({ color: this._ambientColor, emissive: this._emissiveColor });
+        this.material.setValues({
+            emissive: this._emissiveColor,
+        });
     }
 
     updateVertices() {
@@ -284,13 +294,13 @@ class Button extends EventMesh {
     repaint() {
         this._ctx.canvas.width = this._textureWidth;
         this._ctx.canvas.height = this._textureHeight;
-        this._ctx.fillStyle = '#FFF';
+        this._ctx.fillStyle = this._ambientColor;
         this._ctx.fillRect(0, 0, this._ctx.canvas.width, this._ctx.canvas.height);
         if (this._image) {
             this._ctx.drawImage(this._image, 0, 0, this._image.width, this._image.height);
         }
         if (this._text) {
-            this._ctx.fillStyle = '#000';
+            this._ctx.fillStyle = this._textColor;
             this._ctx.font = '100px sans-serif';
             const lines = this._text.split('\n');
             const lineWidth = 0.6 * this._textureWidth; // Bisschen Platz rundrum lassen
