@@ -44,6 +44,7 @@ class EventMesh extends Mesh {
         } else {
             if (pos >= 0) EventMesh.AllRaycasterMeshes.splice(pos, 1);
         }
+        this.children.forEach(child => child.enableForRayCaster = enable);
     }
 
     /**

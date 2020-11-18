@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>VR Keyboard</title>
+		<title>VR Dialog</title>
         <link rel="stylesheet" href="vr.css"/>
         <script type="module">
 
@@ -11,7 +11,7 @@ import environment from './environment.js';
 import camera from './camera.js';
 import controls from './controls.js';
 import { LogPanel } from './geometries.js';
-import { Keyboard } from './keyboard.js';
+import { ObjectManipulationDialog } from './dialog.js';
 
 var renderer = new WebGLRenderer();
 document.body.appendChild(renderer.domElement);
@@ -35,15 +35,12 @@ var init = function() {
     logPanel.position.z = -30;
     environment.scene.add(logPanel);
     
-    // Tastatur
-    var keyboard = new Keyboard();
-    keyboard.position.set(-.2, 1.6, -.2);
-    keyboard.scale.set(.02, .02, .02);
-    keyboard.addEventListener(Keyboard.EventType.KeyPressed, (value) => {
-        logPanel.log(value);
-    });
-    environment.scene.add(keyboard);
-    window.keyboard = keyboard;
+    // Dialog
+    var dialog = new ObjectManipulationDialog();
+    dialog.position.set(-.3, 1.9, -.5);
+    dialog.scale.set(.1, .1, .1);
+    environment.scene.add(dialog);
+    window.dialog = dialog;
 
     // Beleuchtung
     const ambientLight = new AmbientLight( 0x404040 );
