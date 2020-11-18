@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="vr.css"/>
         <script type="module">
 
-import { WebGLRenderer } from '../js/lib/three.module.js';
+import { AmbientLight, WebGLRenderer } from '../js/lib/three.module.js';
 import environment from './environment.js';
 import camera from './camera.js';
 import controls from './controls.js';
@@ -39,7 +39,15 @@ var init = function() {
     var keyboard = new Keyboard();
     keyboard.position.set(-.2, 1.6, -.2);
     keyboard.scale.set(.02, .02, .02);
+    keyboard.addEventListener(Keyboard.EventType.KeyPressed, (value) => {
+        logPanel.log(value);
+    });
     environment.scene.add(keyboard);
+    window.keyboard = keyboard;
+
+    // Beleuchtung
+    const ambientLight = new AmbientLight( 0x404040 );
+    environment.scene.add(ambientLight);
 
 };
 

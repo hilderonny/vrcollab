@@ -422,14 +422,12 @@ class GuiButton extends EventMesh {
     set objectHeight(value) {
         this._objectHeight = value;
         this._border.objectHeight = value;
-        //this._button.objectHeight = value;
         this.scaleButton();
     }
 
     set objectWidth(value) {
         this._objectWidth = value;
         this._border.objectWidth = value;
-        //this._button.objectWidth = value;
         this.scaleButton();
     }
 
@@ -451,10 +449,10 @@ class GuiButton extends EventMesh {
         this._isCurrentlyPressed = this._button.position.z === this._buttonInsetPressed;
         if (this._isCurrentlyPressed && !pressed) {
             this._button.position.z = this._buttonInset;
-            this.sendEvent(GuiButton.EventType.Released);
+            this.sendEvent(GuiButton.EventType.Released, this);
         } else if (!this._isCurrentlyPressed && pressed) {
             this._button.position.z = this._buttonInsetPressed;
-            this.sendEvent(GuiButton.EventType.Pressed);
+            this.sendEvent(GuiButton.EventType.Pressed, this);
         }
     }
 
@@ -462,6 +460,9 @@ class GuiButton extends EventMesh {
         this._button.scale.set(this._objectWidth - ( 2 * this._borderWidth), this._objectHeight - ( 2 * this._borderWidth), 1);
         this._button.position.x = this._borderWidth;
         this._button.position.y = -this._borderWidth;
+        this._button._textureWidth = 512 * this._objectWidth;
+        this._button._textureHeight = 512 * this._objectHeight;
+        this._button.repaint();
     }
 
 }

@@ -1,6 +1,5 @@
-import { Object3D } from '../js/lib/three.module.js';
-import { EventMesh, LogPanel } from './geometries.js';
-import { GuiButton } from './gui.js';
+import { EventMesh } from './geometries.js';
+import { GuiButton, GuiToggleButton } from './gui.js';
 
 const keys = [
     [
@@ -102,25 +101,126 @@ const keys = [
     ],
 ]
 
-class Keyboard extends Object3D {
+/**
+ * Einstellungen:
+ * - borderAmbientColor = 0xffeb3b,
+ * - borderEmissiveColor = 0x421048,
+ * - borderDepth = 1,
+ * - borderWidth = .1,
+ * - buttonAmbientColor = 0xeb3bff,
+ * - buttonEmissiveColor = 0x421048,
+ * - buttonHeight = .4,
+ * - buttonInset = -.1,
+ * - buttonInsetPressed = -.3,
+ * - buttonTilt = .1,
+ * 
+ * Events:
+ * - KeyPressed(value)
+ */
+class Keyboard extends EventMesh {
 
     constructor() {
         super();
+        this._isShiftDown = false;
+        this._isCapsLock = false;
+        this._shiftButtons = [];
+        this._shiftableButtons = [];
+        this._buttons = [];
         for (let i = 0; i < keys.length; i++) {
             let row = keys[i];
-            for (let j = 0; j < row.length; j++) {
-                let key = row[j];
-                const button = new GuiButton({ text: key.label ? key.label : key.value });
-                button.key = key;
-                button.addEventListener(EventMesh.EventType.ButtonDown, (button) => {
-                    console.log(button, this);
-                    LogPanel.lastPanel.log(button.key.value);
+            for (let j = 0, x = 0; j < row.length; j++) {
+                const key = row[j];
+                const width = key.width ? key.width : 1;
+                const whichButton = ['SHIFT', 'CAPSLOCK'].includes(key.value) ? GuiToggleButton : GuiButton;
+                const button = new whichButton({
+                    borderWidth: .02,
+                    text: (key.label ? key.label : key.value),
+                    objectWidth: width,
+                    textureWidth: width * 512,
+                    borderAmbientColor: '#ccc',
+                    borderEmissiveColor: '#000',
+                    buttonAmbientColor: '#fff',
+                    buttonEmissiveColor: '#000',
+                    buttonHeight: .2,
+                    buttonInset: -.05,
+                    buttonInsetPressed: -.15,
+                    borderDepth: .15,
+                    buttonTilt: .04
                 });
-                button.position.set(j, -i, 0);
+                button.key = key;
+                button._button.bumpScale = -.0002;
+                if (key.value === 'SHIFT') {
+                    this._shiftButtons.push(button);
+                    button.addEventListener(GuiButton.EventType.Pressed, () => {
+                        this._isShiftDown = true;
+                        for (let btn of this._shiftableButtons) {
+                            btn.text = btn.key.shift.label ? btn.key.shift.label : btn.key.shift.value;
+                        }
+                    });
+                    button.addEventListener(GuiButton.EventType.Released, () => {
+                        this._isShiftDown = false;
+                        if (!this._isCapsLock) {
+                            for (let btn of this._shiftableButtons) {
+                                btn.text = btn.key.label ? btn.key.label : btn.key.value;
+                            }
+                        }
+                    });
+                } else if (key.value === 'CAPSLOCK') {
+                    button.addEventListener(GuiButton.EventType.Pressed, () => {
+                        this._isCapsLock = true;
+                        for (let btn of this._shiftableButtons) {
+                            btn.text = btn.key.shift.label ? btn.key.shift.label : btn.key.shift.value;
+                        }
+                    });
+                    button.addEventListener(GuiButton.EventType.Released, () => {
+                        this._isCapsLock = false;
+                        if (!this._isShiftDown) {
+                            for (let btn of this._shiftableButtons) {
+                                btn.text = btn.key.label ? btn.key.label : btn.key.value;
+                            }
+                        }
+                    });
+                } else {
+                    button.addEventListener(GuiButton.EventType.Pressed, (button) => {
+                        let value = ((this._isShiftDown || this._isCapsLock) && button.key.shift) ? button.key.shift.value : button.key.value;
+                        if (this._isShiftDown) {
+                            for (let shiftButton of this._shiftButtons) {
+                                shiftButton.setPressed(false);
+                            }
+                        }
+                        this.sendEvent(Keyboard.EventType.KeyPressed, value);
+                    });
+                }
+                if (key.shift) {
+                    this._shiftableButtons.push(button);
+                }
+                button.position.set(x, -i, 0);
+                this._buttons.push(button);
                 this.add(button);
+                x += width;
             }
         }
     }
+
+    set borderAmbientColor(value) { this._buttons.forEach(b => b.borderAmbientColor = value); }
+    set borderEmissiveColor(value) { this._buttons.forEach(b => b.borderEmissiveColor = value); }
+    set borderDepth(value) { this._buttons.forEach(b => b.borderDepth = value); }
+    set borderWidth(value) { this._buttons.forEach(b => b.borderWidth = value); }
+    set buttonAmbientColor(value) { this._buttons.forEach(b => b.buttonAmbientColor = value); }
+    set buttonEmissiveColor(value) { this._buttons.forEach(b => b.buttonEmissiveColor = value); }
+    set buttonHeight(value) { this._buttons.forEach(b => b.buttonHeight = value); }
+    set buttonInset(value) { this._buttons.forEach(b => b.buttonInset = value); }
+    set buttonInsetPressed(value) { this._buttons.forEach(b => b.buttonInsetPressed = value); }
+    set buttonTilt(value) { this._buttons.forEach(b => b.buttonTilt = value); }
+   
 }
+
+Keyboard.EventType = {
+    /**
+     * Wird gesendet, wenn eine Taste gedrückt wurde.
+     * Hat als Paramter den Wert der Taste
+     */
+    KeyPressed: 'keyboardkeypressed',
+};
 
 export { Keyboard }
