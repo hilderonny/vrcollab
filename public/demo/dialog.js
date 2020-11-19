@@ -1,5 +1,5 @@
 import { EventMesh } from './geometries.js';
-import { CheckBoxGuiToggleButton, GuiButton, GuiToggleButton, GuiToggleButtonList } from './gui.js';
+import { CheckBoxGuiToggleButton, GuiButton, GuiTextOutput, GuiToggleButton, GuiToggleButtonList } from './gui.js';
 
 /**
  * Das ist kein abstrakter Dialog, sondern speziell für die Manipulation von 3D Objekten.
@@ -15,11 +15,13 @@ class ObjectManipulationDialog extends EventMesh {
 
         let screenToggleButtonList = new GuiToggleButtonList();
         let propertiesSubScreenToggleButtonList = new GuiToggleButtonList();
+        let coordinatesToggleButtonList = new GuiToggleButtonList();
 
         // Home
 
         let homeScreen = {};
         homeScreen['LevelUpButton'] = this.createButton('⇧', 0, 0, 1, () => {});
+        homeScreen['CurrentLevelOutput'] = this.createTextOutput('Das ist kein abstrakter Dialog, sondern speziell für die Manipulation von 3D Objekten. Das ist kein abstrakter Dialog, sondern speziell für die Manipulation von 3D Objekten.', 1, 0, 4, 1, true, '/images/paper-bg-1.png');
         homeScreen['AddButton'] = this.createButton('✙', 5, 0, 1, () => {});
 
         let homeToggleButton = this.createToggleButton('☰', 0, 1, 1, () => { this.showScreen('Home'); })
@@ -34,7 +36,9 @@ class ObjectManipulationDialog extends EventMesh {
         }));
         homeScreen['ListButton01'] = this.createButton('', 1, 2, 2, () => {});
         homeScreen['ListButton11'] = this.createButton('', 3, 2, 2, () => {});
+        homeScreen['CurrentPageOutput'] = this.createTextOutput('Seite\n999 / 999', 5, 2, 1, 3, true, null, '#fff', .07);
 
+        homeScreen['EmptyLabel1'] = this.createTextOutput('', 0, 3, 1);
         homeScreen['ListButton02'] = this.createButton('', 1, 3, 2, () => {});
         homeScreen['ListButton12'] = this.createButton('', 3, 3, 2, () => {});
 
@@ -74,9 +78,27 @@ class ObjectManipulationDialog extends EventMesh {
 
         let moveScreen = {};
 
+        let xToggleButton = this.createToggleButton('X', 1, 1, 1, () => { });
+        coordinatesToggleButtonList.addToggleButton(xToggleButton);
+        coordinatesToggleButtonList.addToggleButton(this.createToggleButton('Y', 1, 2, 1, () => { }));
+        coordinatesToggleButtonList.addToggleButton(this.createToggleButton('Z', 1, 3, 1, () => { }));
+
         moveScreen['ScreenToggleButtonList'] = screenToggleButtonList;
         moveScreen['PropertiesSubScreenToggleButtonList'] = propertiesSubScreenToggleButtonList;
-        
+        moveScreen['CoordinatesToggleButtonList'] = coordinatesToggleButtonList;
+
+        let manipulateButtons = {
+            '+10' : this.createButton('+10', 1, 4, 1, () => {}),
+            '+1' : this.createButton('+1', 2, 4, 1, () => {}),
+            '+0,1' : this.createButton('+0,1', 3, 4, 1, () => {}),
+            '+0,01' : this.createButton('+0,01', 4, 4, 1, () => {}),
+            '-10' : this.createButton('-10', 1, 5, 1, () => {}),
+            '-1' : this.createButton('-1', 2, 5, 1, () => {}),
+            '-0,1' : this.createButton('-0,1', 3, 5, 1, () => {}),
+            '-0,01' : this.createButton('-0,01', 4, 5, 1, () => {}),
+        };
+        Object.entries(manipulateButtons).forEach((entry) => { moveScreen[entry[0]] = entry[1]; });
+
         this._screens['Move'] = moveScreen;
 
         // Rotate
@@ -85,7 +107,9 @@ class ObjectManipulationDialog extends EventMesh {
 
         rotateScreen['ScreenToggleButtonList'] = screenToggleButtonList;
         rotateScreen['PropertiesSubScreenToggleButtonList'] = propertiesSubScreenToggleButtonList;
-        
+        rotateScreen['CoordinatesToggleButtonList'] = coordinatesToggleButtonList;
+        Object.entries(manipulateButtons).forEach((entry) => { rotateScreen[entry[0]] = entry[1]; });
+
         this._screens['Rotate'] = rotateScreen;
 
         // Scale
@@ -94,13 +118,16 @@ class ObjectManipulationDialog extends EventMesh {
 
         scaleScreen['ScreenToggleButtonList'] = screenToggleButtonList;
         scaleScreen['PropertiesSubScreenToggleButtonList'] = propertiesSubScreenToggleButtonList;
-        
+        scaleScreen['CoordinatesToggleButtonList'] = coordinatesToggleButtonList;
+        Object.entries(manipulateButtons).forEach((entry) => { scaleScreen[entry[0]] = entry[1]; });
+
         this._screens['Scale'] = scaleScreen;
 
         // Vorauswahl
 
         propertiesToggleButton.handleButtonDown();
         homeToggleButton.handleButtonDown();
+        xToggleButton.handleButtonDown();
     }
 
     _createButton(type, label, x, y, width, clickListener) {
@@ -138,8 +165,22 @@ class ObjectManipulationDialog extends EventMesh {
         return this._createButton(GuiToggleButton, label, x, y, width, clickListener);
     }
 
-    createTextOutput() {
-
+    createTextOutput(text = '', x = 0, y = 0, width = 1, height = 1, center = false, imageUrl = null, textColor = '#000', fontSize = .15) {
+        let textOutput = new GuiTextOutput({
+            ambientColor: '#333',
+            emissiveColor: '#000',
+            textColor: textColor,
+            text: text,
+            fontSize: fontSize,
+            padding: .05,
+            objectWidth: width,
+            objectHeight: height,
+            center: center,
+            imageUrl: imageUrl,
+        });
+        textOutput.position.set(x, -y, 0);
+        textOutput.bumpScale = -.0005;
+        return textOutput;
     }
 
     showScreen(screenName) {

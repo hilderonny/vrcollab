@@ -212,7 +212,6 @@ class Button extends EventMesh {
 
     set ambientColor(value) {
         this._ambientColor = value;
-        //this.updateMaterial();
         this.repaint();
     }
 
@@ -501,24 +500,26 @@ class GuiTextOutput extends Mesh {
      *  objectWidth = 1,
      *  padding = 0,
      *  text = null,
+     *  textColor = '#000',
      *  textureHeight = 512,
      *  textureWidth = 512,
      * }
      */
     constructor(config) {
         super(new BufferGeometry(), new MeshPhongMaterial());
-        this._ambientColor = 0xffeb3b;
+        this._ambientColor = '#333';
         this._center = false;
-        this._emissiveColor = 0x484210;
+        this._emissiveColor = '#000';
         this._fontSize = .5; // Relativ zur Objekthöhe
         this._objectHeight = 1;
         this._objectWidth = 1;
         this._padding = 0;
         this._text = null;
+        this._textColor = '#fff';
         this._textureHeight = 512;
         this._textureWidth = 512;
         this._ctx = document.createElement('canvas').getContext('2d');
-        const texture = new CanvasTexture(this._ctx.canvas);;
+        const texture = new Texture(this._ctx.canvas);;
         this.material.map = texture;
         this.material.bumpMap = texture;
         this.material.bumpScale = 0;
@@ -542,7 +543,7 @@ class GuiTextOutput extends Mesh {
 
     set ambientColor(value) {
         this._ambientColor = value;
-        this.updateMaterial();
+        this.repaint();
     }
 
     set bumpScale(value) {
@@ -565,13 +566,28 @@ class GuiTextOutput extends Mesh {
         this.repaint();
     }
 
+    set imageUrl(value) {
+        if (!value) {
+            this._image = null;
+            this.repaint(); //  Clear image
+        } else {
+            this._image = new Image(this._textureWidth * this._objectWidth, this._textureHeight * this._objectHeight);
+            this._image.onload = () => {
+                this.repaint();
+            }
+            this._image.src = value;
+        }
+    }
+
     set objectHeight(value) {
         this._objectHeight = value;
+        if (this._image) this._image.height = this._textureHeight * this._objectHeight;
         this.updateVertices();
     }
 
     set objectWidth(value) {
         this._objectWidth = value;
+        if (this._image) this._image.width = this._textureWidth * this._objectWidth;
         this.updateVertices();
     }
 
@@ -585,8 +601,17 @@ class GuiTextOutput extends Mesh {
         this.repaint();
     }
 
+    set textColor(value) {
+        this._textColor = value;
+        this.repaint();
+    }
+
+    updateImage() {
+
+    }
+
     updateMaterial() {
-        this.material.setValues({ color: this._ambientColor, emissive: this._emissiveColor });
+        this.material.setValues({ emissive: this._emissiveColor });
     }
 
     updateVertices() {
@@ -606,10 +631,13 @@ class GuiTextOutput extends Mesh {
         let textureHeight = this._textureHeight * this._objectHeight;
         this._ctx.canvas.width = textureWidth;
         this._ctx.canvas.height = textureHeight;
-        this._ctx.fillStyle = '#FFF';
+        this._ctx.fillStyle = this._ambientColor;
         this._ctx.fillRect(0, 0, textureWidth, textureHeight);
+        if (this._image) {
+            this._ctx.drawImage(this._image, 0, 0, this._image.width, this._image.height);
+        }
         if (this._text) {
-            this._ctx.fillStyle = '#000';
+            this._ctx.fillStyle = this._textColor;
             let fontSizeInPixels = textureHeight * this._fontSize;
             let maxWidth = textureWidth * (1 - 2 * this._padding);
             let maxHeight = textureHeight * (1 - 2 * this._padding);
