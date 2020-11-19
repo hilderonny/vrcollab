@@ -1,5 +1,5 @@
 import { EventMesh } from './geometries.js';
-import { GuiButton, GuiToggleButton, GuiToggleButtonList } from './gui.js';
+import { CheckBoxGuiToggleButton, GuiButton, GuiToggleButton, GuiToggleButtonList } from './gui.js';
 
 /**
  * Das ist kein abstrakter Dialog, sondern speziell für die Manipulation von 3D Objekten.
@@ -63,7 +63,7 @@ class ObjectManipulationDialog extends EventMesh {
         propertiesSubScreenToggleButtonList.addToggleButton(this.createToggleButton('🗘', 5, 3, 1, () => { this.showScreen('Rotate'); }));
         propertiesSubScreenToggleButtonList.addToggleButton(this.createToggleButton('⤢', 5, 4, 1, () => { this.showScreen('Scale'); }));
 
-        propertiesScreen['HasGeometryButton'] = this.createButton('🗹', 1, 2, 1, () => {});
+        propertiesScreen['HasGeometryButton'] = this.createCheckBoxToggleButton(1, 2, 1, () => {});
 
         propertiesScreen['ScreenToggleButtonList'] = screenToggleButtonList;
         propertiesScreen['PropertiesSubScreenToggleButtonList'] = propertiesSubScreenToggleButtonList;
@@ -103,8 +103,8 @@ class ObjectManipulationDialog extends EventMesh {
         homeToggleButton.handleButtonDown();
     }
 
-    createButton(label = '', x = 0, y = 0, width = 1, clickListener) {
-        const button = new GuiButton({
+    _createButton(type, label, x, y, width, clickListener) {
+        const button = new type({
             borderWidth: .02,
             text: label,
             objectWidth: width,
@@ -126,27 +126,16 @@ class ObjectManipulationDialog extends EventMesh {
         return button;
     }
 
+    createButton(label = '', x = 0, y = 0, width = 1, clickListener) {
+        return this._createButton(GuiButton, label, x, y, width, clickListener);
+    }
+
+    createCheckBoxToggleButton(x = 0, y = 0, width = 1, clickListener) {
+        return this._createButton(CheckBoxGuiToggleButton, null, x, y, width, clickListener);
+    }
+
     createToggleButton(label = '', x = 0, y = 0, width = 1, clickListener) {
-        const button = new GuiToggleButton({
-            borderWidth: .02,
-            text: label,
-            objectWidth: width,
-            textureWidth: width * 512,
-            borderAmbientColor: '#333',
-            borderEmissiveColor: '#000',
-            buttonAmbientColor: '#600',
-            buttonEmissiveColor: '#000',
-            buttonHeight: .2,
-            buttonInset: -.05,
-            buttonInsetPressed: -.15,
-            borderDepth: .15,
-            buttonTilt: .04,
-        });
-        button.position.set(x, -y, 0);
-        button._button.bumpScale = .001;
-        button._button.textColor = '#fd0';
-        button.addEventListener(GuiButton.EventType.Pressed, clickListener);
-        return button;
+        return this._createButton(GuiToggleButton, label, x, y, width, clickListener);
     }
 
     createTextOutput() {

@@ -678,6 +678,23 @@ class GuiToggleButton extends GuiButton {
 }
 
 /**
+ * Rendert eine Checkbox auf dem Toggle-Button, die entweder einen Haken enthält (🗹), oder halt nicht (☐).
+ * Unicode-Quelle: https://www.compart.com/de/unicode/search?q=k%C3%A4stchen#characters
+ */
+class CheckBoxGuiToggleButton extends GuiToggleButton {
+
+    constructor(config) {
+        super(config);
+        this.text = '☐';
+    }
+
+    setPressed(value) {
+        this.text = value ? '🗹' : '☐';
+        super.setPressed(value);
+    }
+}
+
+/**
  * Liste von Toggle-Buttons, die sich gegensetig bedingen.
  * Drückt man einen, kommen die anderen raus.
  */
@@ -702,4 +719,4 @@ class GuiToggleButtonList extends Object3D {
 
 }
 
-export { GuiButton, GuiTextOutput, GuiToggleButton, GuiToggleButtonList }
+export { CheckBoxGuiToggleButton, GuiButton, GuiTextOutput, GuiToggleButton, GuiToggleButtonList }
