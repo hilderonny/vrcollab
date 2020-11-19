@@ -399,6 +399,7 @@ var controls = {
 
     update: function() {
         this.controlsInstance.update?.();
+        // Ich sollte das mit scene.children, recursive und visible = true/false machen. https://github.com/mrdoob/three.js/blob/a1daef37e5a6b80d0173af54edd000202b95fca5/src/core/Raycaster.js#L46
         if (EventMesh.AllRaycasterMeshes.length) {
             this.controlsInstance.updateRaycaster?.(this.raycaster); // https://ponyfoo.com/articles/null-propagation-operator
             var intersects = this.raycaster.intersectObjects(EventMesh.AllRaycasterMeshes);

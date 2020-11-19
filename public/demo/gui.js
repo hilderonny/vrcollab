@@ -1,4 +1,4 @@
-import { BufferAttribute, BufferGeometry, CanvasTexture, Mesh, MeshBasicMaterial, MeshPhongMaterial, Object3D, Texture } from '../js/lib/three.module.js';
+import { BufferAttribute, BufferGeometry, MeshPhongMaterial, Texture } from '../js/lib/three.module.js';
 import { EventMesh } from './geometries.js';
 
 // constructor-Parameter: https://stackoverflow.com/a/52509813/12127220
@@ -6,7 +6,7 @@ import { EventMesh } from './geometries.js';
 /**
  * Das ist der Rahmen eines GuiButtons.
  */
-class Border extends Mesh {
+class Border extends EventMesh {
 
     /**
      * config = {
@@ -487,7 +487,7 @@ GuiButton.EventType = {
     Released: 'guibuttonreleased',
 };
 
-class GuiTextOutput extends Mesh {
+class GuiTextOutput extends EventMesh {
 
     /**
      * config = {
@@ -713,11 +713,11 @@ class CheckBoxGuiToggleButton extends GuiToggleButton {
 
     constructor(config) {
         super(config);
-        this.text = '☐';
+        this.text = 'Nein';
     }
 
     setPressed(value) {
-        this.text = value ? '🗹' : '☐';
+        this.text = value ? 'Ja' : 'Nein';
         super.setPressed(value);
     }
 }
@@ -726,7 +726,7 @@ class CheckBoxGuiToggleButton extends GuiToggleButton {
  * Liste von Toggle-Buttons, die sich gegensetig bedingen.
  * Drückt man einen, kommen die anderen raus.
  */
-class GuiToggleButtonList extends Object3D {
+class GuiToggleButtonList extends EventMesh {
 
     constructor() {
         super();

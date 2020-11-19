@@ -20,17 +20,17 @@ class ObjectManipulationDialog extends EventMesh {
         // Home
 
         let homeScreen = {};
-        homeScreen['LevelUpButton'] = this.createButton('⇧', 0, 0, 1, () => {});
+        homeScreen['LevelUpButton'] = this.createButton('Ebene\nhoch', 0, 0, 1, () => {});
         homeScreen['CurrentLevelOutput'] = this.createTextOutput('Das ist kein abstrakter Dialog, sondern speziell für die Manipulation von 3D Objekten. Das ist kein abstrakter Dialog, sondern speziell für die Manipulation von 3D Objekten.', 1, 0, 4, 1, true, '/images/paper-bg-1.png');
-        homeScreen['AddButton'] = this.createButton('✙', 5, 0, 1, () => {});
+        homeScreen['AddButton'] = this.createButton('Neues\nObjekt', 5, 0, 1, () => {});
 
-        let homeToggleButton = this.createToggleButton('☰', 0, 1, 1, () => { this.showScreen('Home'); })
+        let homeToggleButton = this.createToggleButton('Hierarchie', 0, 1, 1, () => { this.showScreen('Home'); })
         screenToggleButtonList.addToggleButton(homeToggleButton);
         homeScreen['ListButton00'] = this.createButton('', 1, 1, 2, () => {});
         homeScreen['ListButton10'] = this.createButton('', 3, 1, 2, () => {});
-        homeScreen['UpButton'] = this.createButton('△', 5, 1, 1, () => {});
+        homeScreen['UpButton'] = this.createButton('Vorherige\nSeite', 5, 1, 1, () => {});
 
-        screenToggleButtonList.addToggleButton(this.createToggleButton('🛈', 0, 2, 1, () => { 
+        screenToggleButtonList.addToggleButton(this.createToggleButton('Eigenschaften', 0, 2, 1, () => { 
             propertiesToggleButton.handleButtonDown(); // Ersten Unterscreen immer markieren
             this.showScreen('Properties');
         }));
@@ -42,14 +42,14 @@ class ObjectManipulationDialog extends EventMesh {
         homeScreen['ListButton02'] = this.createButton('', 1, 3, 2, () => {});
         homeScreen['ListButton12'] = this.createButton('', 3, 3, 2, () => {});
 
-        homeScreen['CopyButton'] = this.createButton('🗍', 0, 4, 1, () => {});
+        homeScreen['CopyButton'] = this.createButton('Duplizieren', 0, 4, 1, () => {});
         homeScreen['ListButton03'] = this.createButton('', 1, 4, 2, () => {});
         homeScreen['ListButton13'] = this.createButton('', 3, 4, 2, () => {});
 
-        homeScreen['DeleteButton'] = this.createButton('🗑', 0, 5, 1, () => {});
+        homeScreen['DeleteButton'] = this.createButton('Löschen', 0, 5, 1, () => {});
         homeScreen['ListButton04'] = this.createButton('', 1, 5, 2, () => {});
         homeScreen['ListButton14'] = this.createButton('', 3, 5, 2, () => {});
-        homeScreen['DownButton'] = this.createButton('▽', 5, 5, 1, () => {});
+        homeScreen['DownButton'] = this.createButton('Nächste\nSeite', 5, 5, 1, () => {});
 
         homeScreen['ScreenToggleButtonList'] = screenToggleButtonList;
         
@@ -59,13 +59,13 @@ class ObjectManipulationDialog extends EventMesh {
 
         let propertiesScreen = {};
 
-        let propertiesToggleButton = this.createToggleButton('🖺', 5, 1, 1, () => {
+        let propertiesToggleButton = this.createToggleButton('Eigenschaften', 5, 1, 1, () => {
             this.showScreen('Properties');
         });
         propertiesSubScreenToggleButtonList.addToggleButton(propertiesToggleButton);
-        propertiesSubScreenToggleButtonList.addToggleButton(this.createToggleButton('🡧', 5, 2, 1, () => { this.showScreen('Move'); }));
-        propertiesSubScreenToggleButtonList.addToggleButton(this.createToggleButton('🗘', 5, 3, 1, () => { this.showScreen('Rotate'); }));
-        propertiesSubScreenToggleButtonList.addToggleButton(this.createToggleButton('⤢', 5, 4, 1, () => { this.showScreen('Scale'); }));
+        propertiesSubScreenToggleButtonList.addToggleButton(this.createToggleButton('Bewegen', 5, 2, 1, () => { this.showScreen('Move'); }));
+        propertiesSubScreenToggleButtonList.addToggleButton(this.createToggleButton('Rotieren', 5, 3, 1, () => { this.showScreen('Rotate'); }));
+        propertiesSubScreenToggleButtonList.addToggleButton(this.createToggleButton('Skalieren', 5, 4, 1, () => { this.showScreen('Scale'); }));
 
         propertiesScreen['HasGeometryButton'] = this.createCheckBoxToggleButton(1, 2, 1, () => {});
 
