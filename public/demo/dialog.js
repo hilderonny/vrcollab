@@ -11,49 +11,48 @@ class ObjectManipulationDialog extends EventMesh {
 
     constructor() {
         super();
-        this._screens = {};
 
-        let screenToggleButtonList = new GuiToggleButtonList();
+        let screenToggleButtonList = new GuiToggleButtonList([
+            this.createToggleButton('Hierarchie', 0, 1, 1, () => {
+                this.showScreen('Home');
+            }),
+            this.createToggleButton('Eigenschaften', 0, 2, 1, () => { 
+                propertiesToggleButton.handleButtonDown(); // Ersten Unterscreen immer markieren
+                this.showScreen('Properties');
+            }),
+        ]);
         let propertiesSubScreenToggleButtonList = new GuiToggleButtonList();
         let coordinatesToggleButtonList = new GuiToggleButtonList();
 
-        // Home
+        this._screens = {
+            Home: [
+                this.createButton('Ebene\nhoch', 0, 0, 1, () => {}),
+                this.createTextOutput('Das ist kein abstrakter Dialog, sondern speziell für die Manipulation von 3D Objekten. Das ist kein abstrakter Dialog, sondern speziell für die Manipulation von 3D Objekten.', 1, 0, 4, 1, true, '/images/paper-bg-1.png'),
+                this.createButton('Neues\nObjekt', 5, 0, 1, () => {}),
 
-        let homeScreen = {};
-        homeScreen['LevelUpButton'] = this.createButton('Ebene\nhoch', 0, 0, 1, () => {});
-        homeScreen['CurrentLevelOutput'] = this.createTextOutput('Das ist kein abstrakter Dialog, sondern speziell für die Manipulation von 3D Objekten. Das ist kein abstrakter Dialog, sondern speziell für die Manipulation von 3D Objekten.', 1, 0, 4, 1, true, '/images/paper-bg-1.png');
-        homeScreen['AddButton'] = this.createButton('Neues\nObjekt', 5, 0, 1, () => {});
+                screenToggleButtonList,
+                this.createButton('', 1, 1, 2, () => {}),
+                this.createButton('', 3, 1, 2, () => {}),
+                this.createButton('Vorherige\nSeite', 5, 1, 1, () => {}),
 
-        let homeToggleButton = this.createToggleButton('Hierarchie', 0, 1, 1, () => { this.showScreen('Home'); })
-        screenToggleButtonList.addToggleButton(homeToggleButton);
-        homeScreen['ListButton00'] = this.createButton('', 1, 1, 2, () => {});
-        homeScreen['ListButton10'] = this.createButton('', 3, 1, 2, () => {});
-        homeScreen['UpButton'] = this.createButton('Vorherige\nSeite', 5, 1, 1, () => {});
+                this.createButton('', 1, 2, 2, () => {}),
+                this.createButton('', 3, 2, 2, () => {}),
+                this.createTextOutput('Seite\n999 / 999', 5, 2, 1, 3, true, null, '#fff', .07),
 
-        screenToggleButtonList.addToggleButton(this.createToggleButton('Eigenschaften', 0, 2, 1, () => { 
-            propertiesToggleButton.handleButtonDown(); // Ersten Unterscreen immer markieren
-            this.showScreen('Properties');
-        }));
-        homeScreen['ListButton01'] = this.createButton('', 1, 2, 2, () => {});
-        homeScreen['ListButton11'] = this.createButton('', 3, 2, 2, () => {});
-        homeScreen['CurrentPageOutput'] = this.createTextOutput('Seite\n999 / 999', 5, 2, 1, 3, true, null, '#fff', .07);
+                this.createTextOutput('', 0, 3, 1),
+                this.createButton('', 1, 3, 2, () => {}),
+                this.createButton('', 3, 3, 2, () => {}),
 
-        homeScreen['EmptyLabel1'] = this.createTextOutput('', 0, 3, 1);
-        homeScreen['ListButton02'] = this.createButton('', 1, 3, 2, () => {});
-        homeScreen['ListButton12'] = this.createButton('', 3, 3, 2, () => {});
-
-        homeScreen['CopyButton'] = this.createButton('Duplizieren', 0, 4, 1, () => {});
-        homeScreen['ListButton03'] = this.createButton('', 1, 4, 2, () => {});
-        homeScreen['ListButton13'] = this.createButton('', 3, 4, 2, () => {});
-
-        homeScreen['DeleteButton'] = this.createButton('Löschen', 0, 5, 1, () => {});
-        homeScreen['ListButton04'] = this.createButton('', 1, 5, 2, () => {});
-        homeScreen['ListButton14'] = this.createButton('', 3, 5, 2, () => {});
-        homeScreen['DownButton'] = this.createButton('Nächste\nSeite', 5, 5, 1, () => {});
-
-        homeScreen['ScreenToggleButtonList'] = screenToggleButtonList;
+                this.createButton('Duplizieren', 0, 4, 1, () => {}),
+                this.createButton('', 1, 4, 2, () => {}),
+                this.createButton('', 3, 4, 2, () => {}),
         
-        this._screens['Home'] = homeScreen;
+                this.createButton('Löschen', 0, 5, 1, () => {}),
+                this.createButton('', 1, 5, 2, () => {}),
+                this.createButton('', 3, 5, 2, () => {}),
+                this.createButton('Nächste\nSeite', 5, 5, 1, () => {}),
+            ],
+        };
 
         // Properties
 
@@ -126,7 +125,7 @@ class ObjectManipulationDialog extends EventMesh {
         // Vorauswahl
 
         propertiesToggleButton.handleButtonDown();
-        homeToggleButton.handleButtonDown();
+        screenToggleButtonList.children[0].handleButtonDown();
         xToggleButton.handleButtonDown();
     }
 

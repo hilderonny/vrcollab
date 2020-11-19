@@ -728,20 +728,20 @@ class CheckBoxGuiToggleButton extends GuiToggleButton {
  */
 class GuiToggleButtonList extends EventMesh {
 
-    constructor() {
+    constructor(buttons) {
         super();
-        this.buttonList = [];
+        if (buttons) buttons.forEach((button => { this.addToggleButton(button); }));
     }
 
     addToggleButton(button) {
-        var buttonList = this.buttonList;
+        var children = this.children;
         button.handleButtonDown = function() { // Drücken "entdrückt" alle anderen Buttons
-            for (var b of buttonList) {
+            // function ist hier notwendig, da mit this auf den Button gezeigt werden muss
+            for (var b of children) {
                 b.setPressed(b === this);
             }
         }
         button.handleButtonUp = () => {}; // Button kann nicht direkt deaktiviert werden
-        this.buttonList.push(button);
         this.add(button);
     }
 
