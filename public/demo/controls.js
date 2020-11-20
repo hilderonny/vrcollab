@@ -366,19 +366,19 @@ var controls = {
     raycaster: null,
 
     init: function(renderer, usePointerSphere) {
-        var deviceType = 'desktop';
+        this.deviceType = 'desktop';
         if (navigator.appVersion.indexOf('OculusBrowser') >= 0 /*|| (navigator.appVersion.indexOf('Windows') >= 0 && navigator.xr) || (navigator.appVersion.indexOf('Mac OS X') >= 0 && navigator.xr)*/) {
-            deviceType = 'xr';
+            this.deviceType = 'xr';
         } else if (
             navigator.appVersion.indexOf('Android') >= 0 ||
             navigator.appVersion.indexOf('iPad') >= 0 ||
             navigator.appVersion.indexOf('iPhone') >= 0 ||
             navigator.maxTouchPoints > 0
         ) {
-            deviceType = 'mobile';
+            this.deviceType = 'mobile';
         }
-        console.log(deviceType);
-        switch(deviceType) {
+        console.log(this.deviceType);
+        switch(this.deviceType) {
             case 'desktop': this.controlsInstance = desktopControls; break;
             case 'mobile': this.controlsInstance = mobileControls; break;
             case 'xr': this.controlsInstance = xrControls; break;

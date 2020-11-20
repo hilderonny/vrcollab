@@ -37,9 +37,12 @@ var init = function() {
     
     // Dialog
     var dialog = new ObjectManipulationDialog();
-    dialog.position.set(-.3, 1.9, -.5);
+    //dialog.position.set(-.3, 1.9, -.5);
+    //dialog.scale.set(.1, .1, .1);
+    //environment.scene.add(dialog);
+    dialog.position.set(-.3, .3, -.5);
     dialog.scale.set(.1, .1, .1);
-    environment.scene.add(dialog);
+    camera.cam3.add(dialog);
     window.dialog = dialog;
 
     // Beleuchtung

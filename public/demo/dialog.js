@@ -13,16 +13,34 @@ class ObjectManipulationDialog extends EventMesh {
         super();
 
         let screenToggleButtonList = new GuiToggleButtonList([
-            this.createToggleButton('Hierarchie', 0, 1, 1, () => {
-                this.showScreen('Home');
-            }),
+            this.createToggleButton('Hierarchie', 0, 1, 1, () => { this.showScreen('Home'); }),
             this.createToggleButton('Eigenschaften', 0, 2, 1, () => { 
-                propertiesToggleButton.handleButtonDown(); // Ersten Unterscreen immer markieren
+                propertiesSubScreenToggleButtonList.children[0].handleButtonDown(); // Ersten Unterscreen immer markieren
                 this.showScreen('Properties');
             }),
         ]);
-        let propertiesSubScreenToggleButtonList = new GuiToggleButtonList();
-        let coordinatesToggleButtonList = new GuiToggleButtonList();
+        let propertiesSubScreenToggleButtonList = new GuiToggleButtonList([
+            this.createToggleButton('Allgemein', 5, 1, 1, () => { this.showScreen('Properties'); }),
+            this.createToggleButton('Bewegen', 5, 2, 1, () => { this.showScreen('Move'); }),
+            this.createToggleButton('Rotieren', 5, 3, 1, () => { this.showScreen('Rotate'); }),
+            this.createToggleButton('Skalieren', 5, 4, 1, () => { this.showScreen('Scale'); }),
+        ]);
+        let coordinatesToggleButtonList = new GuiToggleButtonList([
+            this.createToggleButton('X', 1, 1, 1, () => { }),
+            this.createToggleButton('Y', 1, 2, 1, () => { }),
+            this.createToggleButton('Z', 1, 3, 1, () => { }),
+        ]);
+        let manipulateButtons = new EventMesh();
+        manipulateButtons.add(...[
+            this.createButton('+10', 1, 4, 1, () => {}),
+            this.createButton('+1', 2, 4, 1, () => {}),
+            this.createButton('+0,1', 3, 4, 1, () => {}),
+            this.createButton('+0,01', 4, 4, 1, () => {}),
+            this.createButton('-10', 1, 5, 1, () => {}),
+            this.createButton('-1', 2, 5, 1, () => {}),
+            this.createButton('-0,1', 3, 5, 1, () => {}),
+            this.createButton('-0,01', 4, 5, 1, () => {}),
+        ]);
 
         this._screens = {
             Home: [
@@ -52,81 +70,38 @@ class ObjectManipulationDialog extends EventMesh {
                 this.createButton('', 3, 5, 2, () => {}),
                 this.createButton('Nächste\nSeite', 5, 5, 1, () => {}),
             ],
+            Properties: [
+                screenToggleButtonList,
+                propertiesSubScreenToggleButtonList,
+
+                this.createCheckBoxToggleButton(1, 2, 1, () => {}),
+                this.createTextOutput('Hat eine Geometrie', 2, 2, 1, 1, true, null, '#600', .07),
+            ],
+            Move: [
+                screenToggleButtonList,
+                propertiesSubScreenToggleButtonList,
+                coordinatesToggleButtonList,
+                manipulateButtons,
+            ],
+            Rotate: [
+                screenToggleButtonList,
+                propertiesSubScreenToggleButtonList,
+                coordinatesToggleButtonList,
+                manipulateButtons,
+            ],
+            Scale: [
+                screenToggleButtonList,
+                propertiesSubScreenToggleButtonList,
+                coordinatesToggleButtonList,
+                manipulateButtons,
+            ],
         };
-
-        // Properties
-
-        let propertiesScreen = {};
-
-        let propertiesToggleButton = this.createToggleButton('Eigenschaften', 5, 1, 1, () => {
-            this.showScreen('Properties');
-        });
-        propertiesSubScreenToggleButtonList.addToggleButton(propertiesToggleButton);
-        propertiesSubScreenToggleButtonList.addToggleButton(this.createToggleButton('Bewegen', 5, 2, 1, () => { this.showScreen('Move'); }));
-        propertiesSubScreenToggleButtonList.addToggleButton(this.createToggleButton('Rotieren', 5, 3, 1, () => { this.showScreen('Rotate'); }));
-        propertiesSubScreenToggleButtonList.addToggleButton(this.createToggleButton('Skalieren', 5, 4, 1, () => { this.showScreen('Scale'); }));
-
-        propertiesScreen['HasGeometryButton'] = this.createCheckBoxToggleButton(1, 2, 1, () => {});
-
-        propertiesScreen['ScreenToggleButtonList'] = screenToggleButtonList;
-        propertiesScreen['PropertiesSubScreenToggleButtonList'] = propertiesSubScreenToggleButtonList;
-        
-        this._screens['Properties'] = propertiesScreen;
-
-        // Move
-
-        let moveScreen = {};
-
-        let xToggleButton = this.createToggleButton('X', 1, 1, 1, () => { });
-        coordinatesToggleButtonList.addToggleButton(xToggleButton);
-        coordinatesToggleButtonList.addToggleButton(this.createToggleButton('Y', 1, 2, 1, () => { }));
-        coordinatesToggleButtonList.addToggleButton(this.createToggleButton('Z', 1, 3, 1, () => { }));
-
-        moveScreen['ScreenToggleButtonList'] = screenToggleButtonList;
-        moveScreen['PropertiesSubScreenToggleButtonList'] = propertiesSubScreenToggleButtonList;
-        moveScreen['CoordinatesToggleButtonList'] = coordinatesToggleButtonList;
-
-        let manipulateButtons = {
-            '+10' : this.createButton('+10', 1, 4, 1, () => {}),
-            '+1' : this.createButton('+1', 2, 4, 1, () => {}),
-            '+0,1' : this.createButton('+0,1', 3, 4, 1, () => {}),
-            '+0,01' : this.createButton('+0,01', 4, 4, 1, () => {}),
-            '-10' : this.createButton('-10', 1, 5, 1, () => {}),
-            '-1' : this.createButton('-1', 2, 5, 1, () => {}),
-            '-0,1' : this.createButton('-0,1', 3, 5, 1, () => {}),
-            '-0,01' : this.createButton('-0,01', 4, 5, 1, () => {}),
-        };
-        Object.entries(manipulateButtons).forEach((entry) => { moveScreen[entry[0]] = entry[1]; });
-
-        this._screens['Move'] = moveScreen;
-
-        // Rotate
-
-        let rotateScreen = {};
-
-        rotateScreen['ScreenToggleButtonList'] = screenToggleButtonList;
-        rotateScreen['PropertiesSubScreenToggleButtonList'] = propertiesSubScreenToggleButtonList;
-        rotateScreen['CoordinatesToggleButtonList'] = coordinatesToggleButtonList;
-        Object.entries(manipulateButtons).forEach((entry) => { rotateScreen[entry[0]] = entry[1]; });
-
-        this._screens['Rotate'] = rotateScreen;
-
-        // Scale
-
-        let scaleScreen = {};
-
-        scaleScreen['ScreenToggleButtonList'] = screenToggleButtonList;
-        scaleScreen['PropertiesSubScreenToggleButtonList'] = propertiesSubScreenToggleButtonList;
-        scaleScreen['CoordinatesToggleButtonList'] = coordinatesToggleButtonList;
-        Object.entries(manipulateButtons).forEach((entry) => { scaleScreen[entry[0]] = entry[1]; });
-
-        this._screens['Scale'] = scaleScreen;
 
         // Vorauswahl
 
-        propertiesToggleButton.handleButtonDown();
+        propertiesSubScreenToggleButtonList.children[0].handleButtonDown();
         screenToggleButtonList.children[0].handleButtonDown();
-        xToggleButton.handleButtonDown();
+        coordinatesToggleButtonList.children[0].handleButtonDown();
     }
 
     _createButton(type, label, x, y, width, clickListener) {
