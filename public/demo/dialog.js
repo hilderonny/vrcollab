@@ -9,9 +9,8 @@ import { CheckBoxGuiToggleButton, GuiButton, GuiTextInput, GuiTextOutput, GuiTog
  */
 class ObjectManipulationDialog extends EventMesh {
 
-    constructor() {
+    constructor(rootObject) {
         super();
-
         let screenToggleButtonList = new GuiToggleButtonList([
             this.createToggleButton('Hierarchie', 0, 1, 1, () => { this.showScreen('Home'); }),
             this.createToggleButton('Eigenschaften', 0, 2, 1, () => { 
@@ -47,36 +46,52 @@ class ObjectManipulationDialog extends EventMesh {
             this.createButton('-0,1', 3, 5, 1, () => {}),
             this.createButton('-0,01', 4, 5, 1, () => {}),
         ]);
-        let currentLevelOutput = this.createTextOutput('Das ist kein abstrakter Dialog, sondern speziell für die Manipulation von 3D Objekten. Das ist kein abstrakter Dialog, sondern speziell für die Manipulation von 3D Objekten.', 1, 0, 4, 1, true, '/images/paper-bg-1.png');
+        this._childrenList = new EventMesh();
+        this._childrenList.add(...[
+            this.createButton('', 1, 1, 2, button => this.handleChildButtonClick(button)),
+            this.createButton('', 3, 1, 2, button => this.handleChildButtonClick(button)),
+            this.createButton('', 1, 2, 2, button => this.handleChildButtonClick(button)),
+            this.createButton('', 3, 2, 2, button => this.handleChildButtonClick(button)),
+            this.createButton('', 1, 3, 2, button => this.handleChildButtonClick(button)),
+            this.createButton('', 3, 3, 2, button => this.handleChildButtonClick(button)),
+            this.createButton('', 1, 4, 2, button => this.handleChildButtonClick(button)),
+            this.createButton('', 3, 4, 2, button => this.handleChildButtonClick(button)),
+            this.createButton('', 1, 5, 2, button => this.handleChildButtonClick(button)),
+            this.createButton('', 3, 5, 2, button => this.handleChildButtonClick(button)),
+        ]);
 
+        this._currentLevelOutput = this.createTextOutput('Das ist kein abstrakter Dialog, sondern speziell für die Manipulation von 3D Objekten. Das ist kein abstrakter Dialog, sondern speziell für die Manipulation von 3D Objekten.', 1, 0, 4, 1, true, '/images/paper-bg-1.png');
+        this._selectedPageOutput = this.createTextOutput('', 5, 2, 1, 3, true, null, '#fff', .07);
+        this._nameOutput = this.createTextInput('', 2, 1, 3, 1, '/images/zahnradrahmen.png', '#fff', .2, (_, text) => {
+            this._selectedObject.name = text;
+            this.updateHierarchy();
+        });
 
         this._screens = {
             Home: [
-                this.createButton('Ebene\nhoch', 0, 0, 1, () => {}),
-                currentLevelOutput,
+                this.createButton('Ebene\nhoch', 0, 0, 1, () => {
+                    if (this._selectedObject && this._selectedObject.parent) {
+                        this.selectObject(this._selectedObject.parent);
+                    }
+                }),
+                this._currentLevelOutput,
                 this.createButton('Neues\nObjekt', 5, 0, 1, () => {}),
-
                 screenToggleButtonList,
-                this.createButton('', 1, 1, 2, () => {}),
-                this.createButton('', 3, 1, 2, () => {}),
-                this.createButton('Vorherige\nSeite', 5, 1, 1, () => {}),
-
-                this.createButton('', 1, 2, 2, () => {}),
-                this.createButton('', 3, 2, 2, () => {}),
-                this.createTextOutput('Seite\n999 / 999', 5, 2, 1, 3, true, null, '#fff', .07),
-
+                this._childrenList,
+                this.createButton('Vorherige\nSeite', 5, 1, 1, () => {
+                    if (this._currentOffset > 0) {
+                        this.showChildren(this._currentOffset - 10);
+                    }
+                }),
+                this._selectedPageOutput,
                 this.createTextOutput('', 0, 3, 1),
-                this.createButton('', 1, 3, 2, () => {}),
-                this.createButton('', 3, 3, 2, () => {}),
-
                 this.createButton('Duplizieren', 0, 4, 1, () => {}),
-                this.createButton('', 1, 4, 2, () => {}),
-                this.createButton('', 3, 4, 2, () => {}),
-        
                 this.createButton('Löschen', 0, 5, 1, () => {}),
-                this.createButton('', 1, 5, 2, () => {}),
-                this.createButton('', 3, 5, 2, () => {}),
-                this.createButton('Nächste\nSeite', 5, 5, 1, () => {}),
+                this.createButton('Nächste\nSeite', 5, 5, 1, () => {
+                    if (this._currentOffset < (this._filteredChildren.length - 10)) {
+                        this.showChildren(this._currentOffset + 10);
+                    }
+                }),
             ],
             Properties: [
                 screenToggleButtonList,
@@ -84,13 +99,11 @@ class ObjectManipulationDialog extends EventMesh {
                 geometriesToggleButtonList,
 
                 this.createTextOutput('', 0, 0, 1),
-                currentLevelOutput,
+                this._currentLevelOutput,
                 this.createTextOutput('', 5, 0, 1),
 
                 this.createTextOutput('Name', 1, 1, 1, 1, true, null, '#fd0', .2),
-                this.createTextInput('Trullala hoppsassa', 2, 1, 3, 1, '/images/zahnradrahmen.png', '#fff', .2, (_, text) => {
-                    console.log(text);
-                }),
+                this._nameOutput,
 
                 this.createTextOutput('', 0, 3, 1, 3),
                 this.createTextOutput('Ambiente\nFarbe', 1, 3, 1, 1, true, null, '#fd0', .2),
@@ -115,7 +128,7 @@ class ObjectManipulationDialog extends EventMesh {
                 this.createTextOutput('123.456', 2, 3, 3, 1, true, null, '#fff', .5),
 
                 this.createTextOutput('', 0, 0, 1),
-                currentLevelOutput,
+                this._currentLevelOutput,
                 this.createTextOutput('', 5, 0, 1),
                 
                 this.createTextOutput('', 5, 5, 1, 1),
@@ -134,7 +147,7 @@ class ObjectManipulationDialog extends EventMesh {
                 this.createTextOutput('223.456', 2, 3, 3, 1, true, null, '#fff', .5),
 
                 this.createTextOutput('', 0, 0, 1),
-                currentLevelOutput,
+                this._currentLevelOutput,
                 this.createTextOutput('', 5, 0, 1),
                 
                 this.createTextOutput('', 5, 5, 1, 1),
@@ -153,7 +166,7 @@ class ObjectManipulationDialog extends EventMesh {
                 this.createTextOutput('323.456', 2, 3, 3, 1, true, null, '#fff', .5),
 
                 this.createTextOutput('', 0, 0, 1),
-                currentLevelOutput,
+                this._currentLevelOutput,
                 this.createTextOutput('', 5, 0, 1),
                 
                 this.createTextOutput('', 5, 5, 1, 1),
@@ -166,6 +179,8 @@ class ObjectManipulationDialog extends EventMesh {
         screenToggleButtonList.children[0].handleButtonDown();
         coordinatesToggleButtonList.children[0].handleButtonDown();
         geometriesToggleButtonList.children[0].handleButtonDown();
+
+        this.rootObject = rootObject;
     }
 
     _createButton(type, label, x, y, width, clickListener) {
@@ -240,6 +255,10 @@ class ObjectManipulationDialog extends EventMesh {
         return textOutput;
     }
 
+    handleChildButtonClick(childButton) {
+        this.selectObject(childButton.targetObject);
+    }
+
     showScreen(screenName) {
         this.children.forEach(child => child.enableForRayCaster = false);
         this.remove(...this.children);
@@ -261,14 +280,66 @@ class ObjectManipulationDialog extends EventMesh {
     set buttonTextColor(value) { this._buttons.forEach(b => b._button.textColor = value); }
     set buttonTilt(value) { this._buttons.forEach(b => b.buttonTilt = value); }
    
-}
+    set rootObject(value) {
+        this._rootObject = value;
+        this.selectObject(this._rootObject);
+    }
 
-ObjectManipulationDialog.EventType = {
     /**
-     * Wird gesendet, wenn eine Taste gedrückt wurde.
-     * Hat als Paramter den Wert der Taste
+     * Wählt ein Objekt unterhalb des Root Objektes zur Bearbeitung aus.
+     * Muss eine EventMesh sein. Warum? Halt so.
+     * 
+     * TODO: dem Objekt als Kind einen Wireframe-Würfel (Keine EventMesh) zuweisen,
+     * der dessen Abgrenzungen und Selektion visualisiert
      */
-    //KeyPressed: 'keyboardkeypressed',
-};
+    selectObject(object) {
+        this._selectedObject = object;
+        // Info-Panel mit Hierarchie aktualisieren
+        this.updateHierarchy();
+        // Kind-Elemente auflisten, nur die ersten 10 anzeigen
+        this._filteredChildren = object.children.filter(c => c instanceof EventMesh);
+        this.showChildren(0);
+        // Eigenschaftsseite
+        // Name auf Eigenschaftsseite
+        this._nameOutput.text = object.name;
+
+        // TODO: Hier geht es weiter
+        
+        // Geometrietyp
+        // Ambiente Farbe
+        // Leuchtfarbe
+    }
+
+    updateHierarchy() {
+        let text = '';
+        let currentObject = this._selectedObject;
+        do {
+            let name = currentObject.name || ('[' + currentObject.constructor.name + ']');
+            if (text) text = ' > ' + text;
+            text = name + text;
+            currentObject = currentObject.parent;
+        } while(currentObject);
+        this._currentLevelOutput.text = text;
+    }
+
+    showChildren(offset) {
+        this._currentOffset = offset;
+        // Kinder-Buttons
+        this._childrenList.children.forEach(btn => {
+            btn.text = '';
+            btn.targetObject = null;
+        });
+        for (let i = offset, j = 0; i < this._filteredChildren.length && j < 10; i++, j++) {
+            let child = this._filteredChildren[i];
+            let listButton = this._childrenList.children[j];
+            listButton.text = child.name || ('[' + child.constructor.name + ']');
+            listButton.targetObject = child; // Für Klick-Handler
+        }
+        // Paging-Anzeige
+        let currentPage = this._currentOffset / 10 + 1;
+        let pageCount = Math.ceil(this._filteredChildren.length / 10) || 1;
+        this._selectedPageOutput.text = 'Seite\n' + currentPage + ' / ' + pageCount;
+    }
+}
 
 export { ObjectManipulationDialog }

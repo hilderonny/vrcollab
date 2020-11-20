@@ -694,7 +694,7 @@ class GuiTextInput extends GuiTextOutput {
     }
 
     handleKeyDown(event) {
-        if (event.keyCode > 31 && event.keyCode < 127) {
+        if (event.keyCode > 31) {
             this._originalText += event.key;
         } else if (event.keyCode === 8 && this._originalText.length > 0) {
             this._originalText = this._originalText.substr(0, this._originalText.length - 1);

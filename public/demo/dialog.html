@@ -6,11 +6,11 @@
         <link rel="stylesheet" href="vr.css"/>
         <script type="module">
 
-import { AmbientLight, WebGLRenderer } from '../js/lib/three.module.js';
+import { AmbientLight, BoxGeometry, WebGLRenderer } from '../js/lib/three.module.js';
 import environment from './environment.js';
 import camera from './camera.js';
 import controls from './controls.js';
-import { LogPanel } from './geometries.js';
+import { EventMesh, LogPanel } from './geometries.js';
 import { ObjectManipulationDialog } from './dialog.js';
 
 var renderer = new WebGLRenderer();
@@ -34,12 +34,25 @@ var init = function() {
     logPanel.position.y = 10;
     logPanel.position.z = -30;
     environment.scene.add(logPanel);
+
+    // Test-Elemente vor dem Dialog erstellen, damit der Dialog die Testelement zu Beginn anzeigen kann
+    const cube = new EventMesh(new BoxGeometry());
+    cube.position.set(0, 1, -4);
+    cube.name = 'Würfel';
+    environment.scene.add(cube);
+
+    for (let i = 0; i < 36; i++) {
+        const elem = new EventMesh();
+        elem.name = 'Elem ' + i;
+        cube.add(elem);
+    }
     
     // Dialog
-    var dialog = new ObjectManipulationDialog();
+    var dialog = new ObjectManipulationDialog(environment.scene);
     //dialog.position.set(-.3, 1.9, -.5);
     //dialog.scale.set(.1, .1, .1);
     //environment.scene.add(dialog);
+    // TODO: An Quest Controller andocken, wenn Quest benutzt wird
     dialog.position.set(-.3, .3, -.5);
     dialog.scale.set(.1, .1, .1);
     camera.cam3.add(dialog);
@@ -48,7 +61,6 @@ var init = function() {
     // Beleuchtung
     const ambientLight = new AmbientLight( 0x404040 );
     environment.scene.add(ambientLight);
-
 };
 
 window.addEventListener('DOMContentLoaded', async function() {
