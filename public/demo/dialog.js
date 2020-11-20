@@ -1,5 +1,5 @@
 import { EventMesh } from './geometries.js';
-import { CheckBoxGuiToggleButton, GuiButton, GuiTextOutput, GuiToggleButton, GuiToggleButtonList } from './gui.js';
+import { CheckBoxGuiToggleButton, GuiButton, GuiTextInput, GuiTextOutput, GuiToggleButton, GuiToggleButtonList } from './gui.js';
 
 /**
  * Das ist kein abstrakter Dialog, sondern speziell für die Manipulation von 3D Objekten.
@@ -30,6 +30,12 @@ class ObjectManipulationDialog extends EventMesh {
             this.createToggleButton('Y', 1, 2, 1, () => { }),
             this.createToggleButton('Z', 1, 3, 1, () => { }),
         ]);
+        let geometriesToggleButtonList = new GuiToggleButtonList([
+            this.createToggleButton('Keine Geometrie', 1, 2, 1, () => { }),
+            this.createToggleButton('Würfel', 2, 2, 1, () => { }),
+            this.createToggleButton('Zylinder', 3, 2, 1, () => { }),
+            this.createToggleButton('Platte', 4, 2, 1, () => { }),
+        ]);
         let manipulateButtons = new EventMesh();
         manipulateButtons.add(...[
             this.createButton('+10', 1, 4, 1, () => {}),
@@ -41,11 +47,13 @@ class ObjectManipulationDialog extends EventMesh {
             this.createButton('-0,1', 3, 5, 1, () => {}),
             this.createButton('-0,01', 4, 5, 1, () => {}),
         ]);
+        let currentLevelOutput = this.createTextOutput('Das ist kein abstrakter Dialog, sondern speziell für die Manipulation von 3D Objekten. Das ist kein abstrakter Dialog, sondern speziell für die Manipulation von 3D Objekten.', 1, 0, 4, 1, true, '/images/paper-bg-1.png');
+
 
         this._screens = {
             Home: [
                 this.createButton('Ebene\nhoch', 0, 0, 1, () => {}),
-                this.createTextOutput('Das ist kein abstrakter Dialog, sondern speziell für die Manipulation von 3D Objekten. Das ist kein abstrakter Dialog, sondern speziell für die Manipulation von 3D Objekten.', 1, 0, 4, 1, true, '/images/paper-bg-1.png'),
+                currentLevelOutput,
                 this.createButton('Neues\nObjekt', 5, 0, 1, () => {}),
 
                 screenToggleButtonList,
@@ -73,27 +81,82 @@ class ObjectManipulationDialog extends EventMesh {
             Properties: [
                 screenToggleButtonList,
                 propertiesSubScreenToggleButtonList,
+                geometriesToggleButtonList,
 
-                this.createCheckBoxToggleButton(1, 2, 1, () => {}),
-                this.createTextOutput('Hat eine Geometrie', 2, 2, 1, 1, true, null, '#600', .07),
+                this.createTextOutput('', 0, 0, 1),
+                currentLevelOutput,
+                this.createTextOutput('', 5, 0, 1),
+
+                this.createTextOutput('Name', 1, 1, 1, 1, true, null, '#fd0', .2),
+                this.createTextInput('Trullala hoppsassa', 2, 1, 3, 1, '/images/zahnradrahmen.png', '#fff', .2, (_, text) => {
+                    console.log(text);
+                }),
+
+                this.createTextOutput('', 0, 3, 1, 3),
+                this.createTextOutput('Ambiente\nFarbe', 1, 3, 1, 1, true, null, '#fd0', .2),
+                this.createTextInput('#888', 2, 3, 3, 1, '/images/zahnradrahmen.png', '#fff', .2, () => { }),
+
+                this.createTextOutput('Leucht-\nfarbe', 1, 4, 1, 1, true, null, '#fd0', .2),
+                this.createTextInput('#666', 2, 4, 3, 1, '/images/zahnradrahmen.png', '#fff', .2, () => { }),
+
+                this.createTextOutput('', 1, 5, 5),
             ],
             Move: [
                 screenToggleButtonList,
                 propertiesSubScreenToggleButtonList,
                 coordinatesToggleButtonList,
                 manipulateButtons,
+
+                this.createTextOutput('123.456', 2, 1, 3, 1, true, null, '#fff', .5),
+
+                this.createTextOutput('123.456', 2, 2, 3, 1, true, null, '#fff', .5),
+
+                this.createTextOutput('', 0, 3, 1, 3),
+                this.createTextOutput('123.456', 2, 3, 3, 1, true, null, '#fff', .5),
+
+                this.createTextOutput('', 0, 0, 1),
+                currentLevelOutput,
+                this.createTextOutput('', 5, 0, 1),
+                
+                this.createTextOutput('', 5, 5, 1, 1),
             ],
             Rotate: [
                 screenToggleButtonList,
                 propertiesSubScreenToggleButtonList,
                 coordinatesToggleButtonList,
                 manipulateButtons,
+                
+                this.createTextOutput('223.456', 2, 1, 3, 1, true, null, '#fff', .5),
+
+                this.createTextOutput('223.456', 2, 2, 3, 1, true, null, '#fff', .5),
+
+                this.createTextOutput('', 0, 3, 1, 3),
+                this.createTextOutput('223.456', 2, 3, 3, 1, true, null, '#fff', .5),
+
+                this.createTextOutput('', 0, 0, 1),
+                currentLevelOutput,
+                this.createTextOutput('', 5, 0, 1),
+                
+                this.createTextOutput('', 5, 5, 1, 1),
             ],
             Scale: [
                 screenToggleButtonList,
                 propertiesSubScreenToggleButtonList,
                 coordinatesToggleButtonList,
                 manipulateButtons,
+                
+                this.createTextOutput('323.456', 2, 1, 3, 1, true, null, '#fff', .5),
+
+                this.createTextOutput('323.456', 2, 2, 3, 1, true, null, '#fff', .5),
+
+                this.createTextOutput('', 0, 3, 1, 3),
+                this.createTextOutput('323.456', 2, 3, 3, 1, true, null, '#fff', .5),
+
+                this.createTextOutput('', 0, 0, 1),
+                currentLevelOutput,
+                this.createTextOutput('', 5, 0, 1),
+                
+                this.createTextOutput('', 5, 5, 1, 1),
             ],
         };
 
@@ -102,6 +165,7 @@ class ObjectManipulationDialog extends EventMesh {
         propertiesSubScreenToggleButtonList.children[0].handleButtonDown();
         screenToggleButtonList.children[0].handleButtonDown();
         coordinatesToggleButtonList.children[0].handleButtonDown();
+        geometriesToggleButtonList.children[0].handleButtonDown();
     }
 
     _createButton(type, label, x, y, width, clickListener) {
@@ -137,6 +201,25 @@ class ObjectManipulationDialog extends EventMesh {
 
     createToggleButton(label = '', x = 0, y = 0, width = 1, clickListener) {
         return this._createButton(GuiToggleButton, label, x, y, width, clickListener);
+    }
+
+    createTextInput(text = '', x = 0, y = 0, width = 1, height = 1, imageUrl = null, textColor = '#000', fontSize = .2, changedListener) {
+        let textInput = new GuiTextInput({
+            ambientColor: '#333',
+            emissiveColor: '#000',
+            textColor: textColor,
+            text: text,
+            fontSize: fontSize,
+            objectWidth: width,
+            objectHeight: height,
+            imageUrl: imageUrl,
+            center: true,
+            padding: .2,
+        });
+        textInput.position.set(x, -y, 0);
+        textInput.bumpScale = -.0005;
+        textInput.addEventListener(GuiTextInput.EventType.Changed, changedListener);
+        return textInput;
     }
 
     createTextOutput(text = '', x = 0, y = 0, width = 1, height = 1, center = false, imageUrl = null, textColor = '#000', fontSize = .15) {

@@ -1,5 +1,6 @@
 import { BufferAttribute, BufferGeometry, MeshPhongMaterial, Texture } from '../js/lib/three.module.js';
 import { EventMesh } from './geometries.js';
+import controls from './controls.js';
 
 // constructor-Parameter: https://stackoverflow.com/a/52509813/12127220
 
@@ -676,6 +677,83 @@ class GuiTextOutput extends EventMesh {
     }
 }
 
+class GuiTextInput extends GuiTextOutput {
+
+    constructor(config) {
+        super(config);
+        this.addEventListener(EventMesh.EventType.ButtonDown, () => {
+            this.selected = true;
+        });
+    }
+
+    intervalFunction() {
+        if (!this._blinkInterval) return; // Ausführung nach Abbruch verhindern
+        this._text = this._originalText + (this._isOn ? '|' : ' ');
+        this._isOn = !this._isOn;
+        this.repaint();
+    }
+
+    handleKeyDown(event) {
+        if (event.keyCode > 31 && event.keyCode < 127) {
+            this._originalText += event.key;
+        } else if (event.keyCode === 8 && this._originalText.length > 0) {
+            this._originalText = this._originalText.substr(0, this._originalText.length - 1);
+        } else if (event.keyCode === 9) {
+            this._originalText += '    ';
+        } else if (event.keyCode === 13 || event.keyCode === 27) {
+            // Enter und Escape beenden die Eingabe
+            this.selected = false;
+            this.sendEvent(GuiTextInput.EventType.Changed, this, this._originalText);
+        }
+        this.intervalFunction();
+    }
+
+    get text() {
+        return this._text;
+    }
+
+    set selected(value) {
+        if (value) {
+            if (this._blinkInterval) return;
+            this._isOn = true;
+            this._blinkInterval = setInterval(() => this.intervalFunction(), 500);
+            this.intervalFunction();
+            GuiTextInput.currentSelectedTextInput = this; // Damit Controller beim woanders hinklicken darauf reagieren kann
+            if (controls.deviceType === 'desktop') {
+                this._keyDownListener = event => this.handleKeyDown(event);
+                controls.controlsInstance.ignoreKeyboardEvents = true;
+                window.addEventListener('keydown', this._keyDownListener);
+            }
+        } else {
+            GuiTextInput.currentSelectedTextInput = null;
+            if (!this._blinkInterval) return;
+            clearInterval(this._blinkInterval);
+            if (controls.deviceType === 'desktop') {
+                window.removeEventListener('keydown', this._keyDownListener);
+                controls.controlsInstance.ignoreKeyboardEvents = false;
+            }
+            this._blinkInterval = null;
+            this._text = this._originalText;
+            this.repaint();
+        }
+    }
+
+    set text(value) {
+        this._text = '' + value;
+        this._originalText = this._text;
+        this.repaint();
+    }
+
+}
+
+GuiTextInput.EventType = {
+    /**
+     * Wird gesendet, sobald die Eingabe durch Enter oder Escape beendet wurde.
+     * Enthält das Control als ersten und den aktuellen Text als zweiten Parameter
+     */
+    Changed: 'guittextinputchanged',
+};
+
 /**
  * Umschalter-Button. Wenn man den drückt, bleibt er drin.
  * Drückt man nochmal, kommt er wieder raus.
@@ -747,4 +825,4 @@ class GuiToggleButtonList extends EventMesh {
 
 }
 
-export { CheckBoxGuiToggleButton, GuiButton, GuiTextOutput, GuiToggleButton, GuiToggleButtonList }
+export { CheckBoxGuiToggleButton, GuiButton, GuiTextInput, GuiTextOutput, GuiToggleButton, GuiToggleButtonList }

@@ -4,6 +4,7 @@ import { XRControllerModelFactory } from '../js/lib/XRControllerModelFactory.js'
 import camera from './camera.js';
 import environment from './environment.js';
 import { EventMesh, LogPanel, MenuPanel } from './geometries.js';
+import { GuiTextInput } from './gui.js';
 
 var desktopControls = {
 
@@ -37,6 +38,7 @@ var desktopControls = {
                 mouseDown = true;
             }
             if (event.button == 0 && this.intersection) {
+                if (GuiTextInput.currentSelectedTextInput) GuiTextInput.currentSelectedTextInput.selected = false;
                 this.intersection.object.sendEvent(EventMesh.EventType.ButtonDown, EventMesh.ButtonCode.MouseLeft, this.intersection.point);
             }
         });
@@ -53,6 +55,7 @@ var desktopControls = {
         });
         renderer.domElement.addEventListener('mousemove', mouseMove);
         renderer.domElement.addEventListener('keydown', (event) => {
+            if (this.ignoreKeyboardEvents) return; // Wird von GuiTextInput gesetzt
             switch(event.key) {
                 case 'w': this.forward = -1; break;
                 case 'a': this.sideward = -1; break;
@@ -61,6 +64,7 @@ var desktopControls = {
             }
         });
         renderer.domElement.addEventListener('keyup', (event) => {
+            if (this.ignoreKeyboardEvents) return;
             switch(event.key) {
                 case 'w': this.forward = 0; break;
                 case 'a': this.sideward = 0; break;
@@ -126,6 +130,7 @@ var mobileControls = {
 
     update: function() {
         if (!this.touchDownHandled && this.intersection) {
+            if (GuiTextInput.currentSelectedTextInput) GuiTextInput.currentSelectedTextInput.selected = false;
             this.intersection.object.sendEvent(EventMesh.EventType.ButtonDown, EventMesh.ButtonCode.TouchScreen, this.intersection.point);
             this.touchDownHandled = true;
         }
@@ -264,6 +269,7 @@ var oculusQuestControls = {
             var leftButtonPressed = this.leftController.xrInputSource.gamepad.buttons[i].pressed;
             if (this.intersection && leftButtonPressed && !this.leftButtonsPressed[i]) {
                 // Button down
+                if (GuiTextInput.currentSelectedTextInput) GuiTextInput.currentSelectedTextInput.selected = false;
                 this.intersection.object.sendEvent(EventMesh.EventType.ButtonDown, this.leftButtonMap[i], this.intersection.point, this.leftController);
             } else if (this.intersection && !leftButtonPressed && this.leftButtonsPressed[i]) {
                 // Button up
@@ -274,6 +280,7 @@ var oculusQuestControls = {
             var rightButtonPressed = this.rightController.xrInputSource.gamepad.buttons[i].pressed;
             if (this.intersection && rightButtonPressed && !this.rightButtonsPressed[i]) {
                 // Button down
+                if (GuiTextInput.currentSelectedTextInput) GuiTextInput.currentSelectedTextInput.selected = false;
                 this.intersection.object.sendEvent(EventMesh.EventType.ButtonDown, this.rightButtonMap[i], this.intersection.point, this.rightController);
             } else if (this.intersection && !rightButtonPressed && this.rightButtonsPressed[i]) {
                 // Button up
@@ -312,6 +319,7 @@ var oculusQuestControls = {
 
     checkAxisAndSendEvent: function(currentStatus, previousStatus, buttonCode, controller) {
         if (currentStatus && !previousStatus) {
+            if (GuiTextInput.currentSelectedTextInput) GuiTextInput.currentSelectedTextInput.selected = false;
             this.intersection.object.sendEvent(EventMesh.EventType.ButtonDown, buttonCode, this.intersection.point, controller);
         } else if (!currentStatus && previousStatus) {
             this.intersection.object.sendEvent(EventMesh.EventType.ButtonUp, buttonCode, this.intersection.point, controller);
