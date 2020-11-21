@@ -19,15 +19,15 @@ class ObjectManipulationDialog extends EventMesh {
             }),
         ]);
         let propertiesSubScreenToggleButtonList = new GuiToggleButtonList([
-            this.createToggleButton('Allgemein', 5, 1, 1, () => { this.showScreen('Properties'); }),
-            this.createToggleButton('Bewegen', 5, 2, 1, () => { this.showScreen('Move'); }),
-            this.createToggleButton('Rotieren', 5, 3, 1, () => { this.showScreen('Rotate'); }),
-            this.createToggleButton('Skalieren', 5, 4, 1, () => { this.showScreen('Scale'); }),
+            this.createToggleButton('Allgemein', 5, 1, 1, () => { this._propertiesMode = ObjectManipulationDialog.PropertiesMode.General; this.showScreen('Properties'); }),
+            this.createToggleButton('Bewegen', 5, 2, 1, () => { this._propertiesMode = ObjectManipulationDialog.PropertiesMode.Move; this.showScreen('Move'); }),
+            this.createToggleButton('Rotieren', 5, 3, 1, () => { this._propertiesMode = ObjectManipulationDialog.PropertiesMode.Rotate; this.showScreen('Rotate'); }),
+            this.createToggleButton('Skalieren', 5, 4, 1, () => { this._propertiesMode = ObjectManipulationDialog.PropertiesMode.Scale; this.showScreen('Scale'); }),
         ]);
         let coordinatesToggleButtonList = new GuiToggleButtonList([
-            this.createToggleButton('X', 1, 1, 1, () => { }),
-            this.createToggleButton('Y', 1, 2, 1, () => { }),
-            this.createToggleButton('Z', 1, 3, 1, () => { }),
+            this.createToggleButton('X', 1, 1, 1, () => { this._manipulationAxis = ObjectManipulationDialog.ManipulationAxis.X }),
+            this.createToggleButton('Y', 1, 2, 1, () => { this._manipulationAxis = ObjectManipulationDialog.ManipulationAxis.Y }),
+            this.createToggleButton('Z', 1, 3, 1, () => { this._manipulationAxis = ObjectManipulationDialog.ManipulationAxis.Z }),
         ]);
         let geometriesToggleButtonList = new GuiToggleButtonList([
             this.createToggleButton('Keine Geometrie', 1, 2, 1, () => { }),
@@ -37,14 +37,14 @@ class ObjectManipulationDialog extends EventMesh {
         ]);
         let manipulateButtons = new EventMesh();
         manipulateButtons.add(...[
-            this.createButton('+10', 1, 4, 1, () => {}),
-            this.createButton('+1', 2, 4, 1, () => {}),
-            this.createButton('+0,1', 3, 4, 1, () => {}),
-            this.createButton('+0,01', 4, 4, 1, () => {}),
-            this.createButton('-10', 1, 5, 1, () => {}),
-            this.createButton('-1', 2, 5, 1, () => {}),
-            this.createButton('-0,1', 3, 5, 1, () => {}),
-            this.createButton('-0,01', 4, 5, 1, () => {}),
+            this.createButton('+10', 1, 4, 1, () => { this.manipulate(10); }),
+            this.createButton('+1', 2, 4, 1, () => { this.manipulate(1); }),
+            this.createButton('+0,1', 3, 4, 1, () => { this.manipulate(.1); }),
+            this.createButton('+0,01', 4, 4, 1, () => { this.manipulate(.01); }),
+            this.createButton('-10', 1, 5, 1, () => { this.manipulate(-10); }),
+            this.createButton('-1', 2, 5, 1, () => { this.manipulate(-1); }),
+            this.createButton('-0,1', 3, 5, 1, () => { this.manipulate(-.1); }),
+            this.createButton('-0,01', 4, 5, 1, () => { this.manipulate(-.01); }),
         ]);
         this._childrenList = new EventMesh();
         this._childrenList.add(...[
@@ -66,6 +66,9 @@ class ObjectManipulationDialog extends EventMesh {
             this._selectedObject.name = text;
             this.updateHierarchy();
         });
+        this._xOutput = this.createTextOutput('', 2, 1, 3, 1, true, null, '#fff', .5);
+        this._yOutput = this.createTextOutput('', 2, 2, 3, 1, true, null, '#fff', .5);
+        this._zOutput = this.createTextOutput('', 2, 3, 3, 1, true, null, '#fff', .5);
 
         this._screens = {
             Home: [
@@ -120,12 +123,10 @@ class ObjectManipulationDialog extends EventMesh {
                 coordinatesToggleButtonList,
                 manipulateButtons,
 
-                this.createTextOutput('123.456', 2, 1, 3, 1, true, null, '#fff', .5),
-
-                this.createTextOutput('123.456', 2, 2, 3, 1, true, null, '#fff', .5),
-
+                this._xOutput,
+                this._yOutput,
                 this.createTextOutput('', 0, 3, 1, 3),
-                this.createTextOutput('123.456', 2, 3, 3, 1, true, null, '#fff', .5),
+                this._zOutput,
 
                 this.createTextOutput('', 0, 0, 1),
                 this._currentLevelOutput,
@@ -139,12 +140,10 @@ class ObjectManipulationDialog extends EventMesh {
                 coordinatesToggleButtonList,
                 manipulateButtons,
                 
-                this.createTextOutput('223.456', 2, 1, 3, 1, true, null, '#fff', .5),
-
-                this.createTextOutput('223.456', 2, 2, 3, 1, true, null, '#fff', .5),
-
+                this._xOutput,
+                this._yOutput,
                 this.createTextOutput('', 0, 3, 1, 3),
-                this.createTextOutput('223.456', 2, 3, 3, 1, true, null, '#fff', .5),
+                this._zOutput,
 
                 this.createTextOutput('', 0, 0, 1),
                 this._currentLevelOutput,
@@ -158,12 +157,10 @@ class ObjectManipulationDialog extends EventMesh {
                 coordinatesToggleButtonList,
                 manipulateButtons,
                 
-                this.createTextOutput('323.456', 2, 1, 3, 1, true, null, '#fff', .5),
-
-                this.createTextOutput('323.456', 2, 2, 3, 1, true, null, '#fff', .5),
-
+                this._xOutput,
+                this._yOutput,
                 this.createTextOutput('', 0, 3, 1, 3),
-                this.createTextOutput('323.456', 2, 3, 3, 1, true, null, '#fff', .5),
+                this._zOutput,
 
                 this.createTextOutput('', 0, 0, 1),
                 this._currentLevelOutput,
@@ -259,6 +256,31 @@ class ObjectManipulationDialog extends EventMesh {
         this.selectObject(childButton.targetObject);
     }
 
+    manipulate(value) {
+        let newValue;
+        switch(this._propertiesMode) {
+            case ObjectManipulationDialog.PropertiesMode.Move:
+                switch (this._manipulationAxis) {
+                    case ObjectManipulationDialog.ManipulationAxis.X:
+                        newValue = this._selectedObject.position.x + value;
+                        this._selectedObject.position.setX(newValue);
+                        this.showX(newValue);
+                        break;
+                    case ObjectManipulationDialog.ManipulationAxis.Y:
+                        newValue = this._selectedObject.position.y + value;
+                        this._selectedObject.position.setY(newValue);
+                        this.showY(newValue);
+                        break;
+                    case ObjectManipulationDialog.ManipulationAxis.Z:
+                        newValue = this._selectedObject.position.z + value;
+                        this._selectedObject.position.setZ(newValue);
+                        this.showZ(newValue);
+                        break;
+                }
+                break;
+        }
+    }
+
     showScreen(screenName) {
         this.children.forEach(child => child.enableForRayCaster = false);
         this.remove(...this.children);
@@ -302,13 +324,20 @@ class ObjectManipulationDialog extends EventMesh {
         // Eigenschaftsseite
         // Name auf Eigenschaftsseite
         this._nameOutput.text = object.name;
-
-        // TODO: Hier geht es weiter
-        
+        // Position
+        this.showX(object.position.x);
+        this.showY(object.position.y);
+        this.showZ(object.position.z);
+        // Rotation
+        // Skalierung
         // Geometrietyp
         // Ambiente Farbe
         // Leuchtfarbe
     }
+
+    showX(value) { this._xOutput.text = value.toFixed(2); }
+    showY(value) { this._yOutput.text = value.toFixed(2); }
+    showZ(value) { this._zOutput.text = value.toFixed(2); }
 
     updateHierarchy() {
         let text = '';
@@ -340,6 +369,19 @@ class ObjectManipulationDialog extends EventMesh {
         let pageCount = Math.ceil(this._filteredChildren.length / 10) || 1;
         this._selectedPageOutput.text = 'Seite\n' + currentPage + ' / ' + pageCount;
     }
+}
+
+ObjectManipulationDialog.ManipulationAxis = {
+    X: 'ObjectManipulationDialog.ManipulationAxis.X',
+    Y: 'ObjectManipulationDialog.ManipulationAxis.Y',
+    Z: 'ObjectManipulationDialog.ManipulationAxis.Z',
+}
+
+ObjectManipulationDialog.PropertiesMode = {
+    General: 'ObjectManipulationDialog.PropertiesMode.General',
+    Move: 'ObjectManipulationDialog.PropertiesMode.Move',
+    Rotate: 'ObjectManipulationDialog.PropertiesMode.Rotate',
+    Scale: 'ObjectManipulationDialog.PropertiesMode.Scale',
 }
 
 export { ObjectManipulationDialog }
