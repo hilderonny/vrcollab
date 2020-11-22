@@ -15,11 +15,15 @@ Bevor controls.init() aufgerufen wird, sollten demnach schon alle EventListener 
 
 |Event|Beschreibung|
 |---|---|
-|`ready`|Wenn die Controller alle initialisiert wurden und verwendet werden können. Auf der *Quest* kommt das Event, wenn beie Handcontroller bereit sind, damit man 3D Objekte an diese dranhängen kann. Enthält den Typ des Controls, der die Platform darstellt.|
-|`pointerEnter`|Wenn der Zeiger bei einer Bewegung ein Objekt trifft. Als Parameter ist das Objekt enthalten|
-|`pointerLeave`|Wenn der Zeiger bei einer Bewegung ein Objekt verlässt. Als Parameter ist das Objekt enthalten|
+|`Ready`|Wenn die Controller alle initialisiert wurden und verwendet werden können. Auf der *Quest* kommt das Event, wenn beie Handcontroller bereit sind, damit man 3D Objekte an diese dranhängen kann. Enthält den Typ des Controls, der die Platform darstellt.|
+|`PointerEnter`|Wenn der Zeiger bei einer Bewegung ein Objekt trifft. Als Parameter ist das Objekt enthalten|
+|`PointerLeave`|Wenn der Zeiger bei einer Bewegung ein Objekt verlässt. Als Parameter ist das Objekt enthalten|
 |`ButtonDown`|Wenn ein Kopf an der Maus oder am VR-Controller gedrückt wurde oder wenn eine Taste auf der Tastatur gedrückt wurde oder wenn auf den Touch-Screen gedrückt wurde.|
 |`ButtonUp`|Wenn eine Maustaste, eine Tastaturtaste, ein VR-Controller--Knopf oder der TouchScreen losgelassen wurde|
+
+Die Events werden mit einem Parameter (data) gesendet.
+- `buttonType`: Art der Event-Quelle (`Controls.ButtonType`)
+- `button`: Code des Buttons
 
 ### Plattformen
 
@@ -30,3 +34,13 @@ Diese sind im `ready` Ereignis in der Eigenschaft `platform` hinterlegt.
 - `xr-1` - VR - Gerät mit einem 3DoF Controller (Oculus Go)
 - `xr-2` - VR - Gerät mit 2 3DoF Controller (Oculus Quest)
 - `xr-hand` - VR - Gerät mit Hand-Tracking (noch nicht implementiert)
+
+### Tastatur-Events
+
+- `data.buttonType`: `Controls.ButtonType.Keyboard`
+- `data.button`: Tastencode (event.keyCode)
+
+## Maus-Events
+
+- `data.buttonType`: `Controls.ButtonType.Mouse`
+- `data.button`: 0 = linke, 1 = mittlere, 2 = rechte Maustaste
