@@ -33,22 +33,23 @@ var init = function() {
     logPanel.position.z = -30;
     environment.scene.add(logPanel);
 
-    let controls = new Controls(camera);
+    let controls = new Controls(camera, environment.scene.children);
     controls.addEventListener(Controls.EventType.ButtonDown, console.log);
     controls.addEventListener(Controls.EventType.ButtonUp, console.log);
     controls.addEventListener(Controls.EventType.PointerEnter, console.log);
     controls.addEventListener(Controls.EventType.PointerLeave, console.log);
+    controls.addEventListener(Controls.EventType.PointerUpdate, console.log);
     controls.addEventListener(Controls.EventType.Ready, console.log);
 
+    renderer.setAnimationLoop(function() {
+        //controls.update(); // Raycasting und so
+        renderer.render(environment.scene, camera.cam3);
+    });
 };
 
 window.addEventListener('DOMContentLoaded', async function() {
     init();
     resize();
-    renderer.setAnimationLoop(function() {
-        //controls.update();
-        renderer.render(environment.scene, camera.cam3);
-    });
 });
 
 		</script>

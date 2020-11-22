@@ -1,9 +1,11 @@
-import { Raycaster } from './lib/three.module.js';
+import { Raycaster, Vector2 } from './lib/three.module.js';
 
 class Controls {
 
-    constructor(camera) {
+    constructor(camera, raycastableObjects) {
         // An window werden die Event Listener für Maus, Touch, etc. gebunden
+        // Alle Objekte, die für Raycaster in Frage kommen
+        this.raycastableObjects = raycastableObjects ? raycastableObjects : [];
         // Kamera brauchen wir für Raycasting später
         this.camera = camera;
         // Event Listeners vorbereiten
@@ -21,11 +23,10 @@ class Controls {
         } else {
             this.initDesktop();
         }
-        console.log(this.platform);
         // Raycaster initialisieren
         this.raycaster = new Raycaster();
-        this.raycaster.near = .1;
-        this.raycaster.far = 20;
+        this.raycaster.near = .05; // Abstand mindestens 5 cm
+        this.raycaster.far = 20; // Höchstens 20 meter entfernt
     }
 
     addEventListener(event, listener) {
@@ -33,7 +34,15 @@ class Controls {
         this.eventListeners[event].push(listener);
     }
 
+    checkIntersection() {
+        let intersects = this.raycaster.intersectObjects(this.raycastableObjects);
+        if (intersects.length < 1) return;
+        this.sendEvent(Controls.EventType.PointerUpdate, intersects[0]);
+    }
+
     initDesktop() {
+        this.mouseVector = new Vector2();
+        this.mouseSpeed = 2;
         this.platform = Controls.Platform.Desktop;
         // Tastaturereignisse
         window.addEventListener('keydown', event => {
@@ -44,13 +53,38 @@ class Controls {
         });
         // Mausknöpfe
         window.addEventListener('mousedown', event => {
+            if (event.button == 2) {
+                this.mouseStartX = event.clientX;
+                this.mouseStartY = event.clientY;
+                this.mouseDown = true;
+            }
             this.sendEvent(Controls.EventType.ButtonDown, { buttonType: Controls.ButtonType.Mouse, button: event.button });
         });
         window.addEventListener('mouseup', event => {
+            if (event.button == 2) {
+                this.mouseDown = false;
+            }
             this.sendEvent(Controls.EventType.ButtonUp, { buttonType: Controls.ButtonType.Mouse, button: event.button });
         });
         // Kontextmenü deaktivieren
         window.addEventListener('contextmenu', event => event.preventDefault() );
+        // Mausbewegung
+        window.addEventListener('mousemove', event => {
+            this.mouseVector.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	        this.mouseVector.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+            if (this.mouseDown) {
+                var deltaX = e.clientX - this.mouseStartX;
+                var deltaY = e.clientY - this.mouseStartY;
+                var min = Math.min(window.innerWidth, window.innerHeight);
+                this.camera.cam3.rotation.x -= deltaY/min * this.mouseSpeed;
+                this.camera.head.rotation.y -= deltaX/min * this.mouseSpeed;
+                this.mouseStartX = e.clientX;
+                this.mouseStartY = e.clientY;
+            } else {
+                this.raycaster.setFromCamera(this.mouseVector, this.camera.cam3);
+                this.checkIntersection();
+            }
+        });
         // Ready melden
         this.sendEvent(Controls.EventType.Ready, { platform: this.platform });
     }
@@ -84,6 +118,7 @@ Controls.EventType = {
     ButtonUp: 'ControlsEventTypeButtonUp',
     PointerEnter: 'ControlsEventTypePointerEnter',
     PointerLeave: 'ControlsEventTypePointerLeave',
+    PointerUpdate: 'ControlsEventTypePointerUpdate',
     Ready: 'ControlsEventTypeReady',
 };
 

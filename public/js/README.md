@@ -18,6 +18,7 @@ Bevor controls.init() aufgerufen wird, sollten demnach schon alle EventListener 
 |`Ready`|Wenn die Controller alle initialisiert wurden und verwendet werden können. Auf der *Quest* kommt das Event, wenn beie Handcontroller bereit sind, damit man 3D Objekte an diese dranhängen kann. Enthält den Typ des Controls, der die Platform darstellt.|
 |`PointerEnter`|Wenn der Zeiger bei einer Bewegung ein Objekt trifft. Als Parameter ist das Objekt enthalten|
 |`PointerLeave`|Wenn der Zeiger bei einer Bewegung ein Objekt verlässt. Als Parameter ist das Objekt enthalten|
+|`PointerUpdate`|Wenn sich der Controllerzeiger bewegt hat|
 |`ButtonDown`|Wenn ein Kopf an der Maus oder am VR-Controller gedrückt wurde oder wenn eine Taste auf der Tastatur gedrückt wurde oder wenn auf den Touch-Screen gedrückt wurde.|
 |`ButtonUp`|Wenn eine Maustaste, eine Tastaturtaste, ein VR-Controller--Knopf oder der TouchScreen losgelassen wurde|
 
@@ -45,3 +46,7 @@ Diese sind im `ready` Ereignis in der Eigenschaft `platform` hinterlegt.
 
 - `data.buttonType`: `Controls.ButtonType.Mouse`
 - `data.button`: 0 = linke, 1 = mittlere, 2 = rechte Maustaste
+
+## Zeiger-Events
+
+- `data`: Gibt [Intersection](https://threejs.org/docs/#api/en/core/Raycaster.intersectObject)-Objekt des nahesten Objektes zurück
