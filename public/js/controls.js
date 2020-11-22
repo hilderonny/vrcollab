@@ -2,10 +2,8 @@ import { Raycaster } from './lib/three.module.js';
 
 class Controls {
 
-    constructor(domElement, camera) {
-        super();
-        // An das DOM-Element werden die Event Listener für Maus, Touch, etc. gebunden
-        this.domElement = domElement;
+    constructor(camera) {
+        // An window werden die Event Listener für Maus, Touch, etc. gebunden
         // Kamera brauchen wir für Raycasting später
         this.camera = camera;
         // Event Listeners vorbereiten
@@ -38,21 +36,23 @@ class Controls {
     initDesktop() {
         this.platform = Controls.Platform.Desktop;
         // Tastaturereignisse
-        this.domElement.addEventListener('keydown', event => {
-            this.sendEvent(Controls.EventType.ButtonDown, { buttonType: Controls.ButtonType.Keyboard, button: event.keyCode });
+        window.addEventListener('keydown', event => {
+            this.sendEvent(Controls.EventType.ButtonDown, { buttonType: Controls.ButtonType.Keyboard, button: event.code, key: event.key });
         });
-        renderer.domElement.addEventListener('keyup', event => {
-            this.sendEvent(Controls.EventType.ButtonUp, { buttonType: Controls.ButtonType.Keyboard, button: event.keyCode });
+        window.addEventListener('keyup', event => {
+            this.sendEvent(Controls.EventType.ButtonUp, { buttonType: Controls.ButtonType.Keyboard, button: event.code, key: event.key });
         });
         // Mausknöpfe
-        this.domElement.addEventListener('mousedown', event => {
+        window.addEventListener('mousedown', event => {
             this.sendEvent(Controls.EventType.ButtonDown, { buttonType: Controls.ButtonType.Mouse, button: event.button });
         });
-        this.domElement.addEventListener('mouseup', event => {
+        window.addEventListener('mouseup', event => {
             this.sendEvent(Controls.EventType.ButtonUp, { buttonType: Controls.ButtonType.Mouse, button: event.button });
         });
         // Kontextmenü deaktivieren
-        this.domElement.addEventListener('contextmenu', event => event.preventDefault() );
+        window.addEventListener('contextmenu', event => event.preventDefault() );
+        // Ready melden
+        this.sendEvent(Controls.EventType.Ready, { platform: this.platform });
     }
 
     initTouch() {
@@ -66,7 +66,7 @@ class Controls {
     sendEvent(eventType, data) {
         let listeners = this.eventListeners[eventType];
         if (listeners) {
-            listeners.forEach(listener => listener(data));
+            listeners.forEach(listener => listener(eventType, data));
         }
     }
 

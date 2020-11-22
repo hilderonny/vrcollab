@@ -38,7 +38,8 @@ Diese sind im `ready` Ereignis in der Eigenschaft `platform` hinterlegt.
 ### Tastatur-Events
 
 - `data.buttonType`: `Controls.ButtonType.Keyboard`
-- `data.button`: Tastencode (event.keyCode)
+- `data.button`: Tastencode (KeyboardEvent.code)
+- `data.key`: Tastenzeichen ('A' und 'a' wird unterschieden) (KeyboardEvent.key)
 
 ## Maus-Events
 
