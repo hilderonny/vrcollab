@@ -42,7 +42,7 @@ var init = function() {
     controls.addEventListener(Controls.EventType.Ready, console.log);
 
     renderer.setAnimationLoop(function() {
-        //controls.update(); // Raycasting und so
+        controls.processAnimationFrame(); // Tastaturbewegung
         renderer.render(environment.scene, camera.cam3);
     });
 };
