@@ -60,3 +60,28 @@ wo genau hingetippt wurde.
 ## Zeiger-Events
 
 - `data`: Gibt [Intersection](https://threejs.org/docs/#api/en/core/Raycaster.intersectObject)-Objekt des nahesten Objektes zurück
+
+# Beispielvorlage
+
+```html
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+        <style>
+            html, body { width: 100%; height: 100%; overflow: hidden; padding: 0; margin: 0; }
+            canvas { display: block; }
+            vrbutton { position: fixed; z-index: 9999; top: 0; left: 0; right: 0; bottom: 0; color: red; background-color: rgba(0,0,0,.9); display: flex; justify-content: center; flex-direction: column; text-align: center; font-size: xxx-large; cursor: pointer; user-select: none; }
+        </style>
+        <script type="module">
+            import { SceneTemplate } from './js/scene.js';
+
+            let sceneTemplate = new SceneTemplate();
+            
+            // ... Hier kommt der ganze individuelle Schnulli rein
+
+        </script>
+    </head>
+    <body></body>
+</html>
+```
