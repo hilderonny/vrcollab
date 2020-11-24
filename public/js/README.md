@@ -47,6 +47,16 @@ Diese sind im `ready` Ereignis in der Eigenschaft `platform` hinterlegt.
 - `data.buttonType`: `Controls.ButtonType.Mouse`
 - `data.button`: 0 = linke, 1 = mittlere, 2 = rechte Maustaste
 
+## Touch-Events
+
+Beim `ButtonDown` Event steht noch nicht fest, ob es ein Tippen oder ein Wischen wird.
+Also mit Vorsicht genießen!
+
+Generell kommen `PointerUpdate` und `ButtonDown/ButtonUp` kurz hintereinander. Damit kann man erkennen,
+wo genau hingetippt wurde.
+
+- `data.buttonType`: `Controls.ButtonType.Touch`
+
 ## Zeiger-Events
 
 - `data`: Gibt [Intersection](https://threejs.org/docs/#api/en/core/Raycaster.intersectObject)-Objekt des nahesten Objektes zurück

@@ -81,7 +81,7 @@ class Controls {
     /**
      * Prüft den Zeiger auf alle raycastableObjects und sendet "PointerUpdate" - Events,
      * wenn es Treffer gibt.
-     * Wird auf dem Dektop durch Mausbewegungen und auf dem Touchscreen durch Fingerwischen getriggert.
+     * Wird auf dem Dektop durch Mausbewegungen und auf dem Touchscreen durch Fingerwischen oder Tippen getriggert.
      * Auf XR-Geräten wird diese Funktion durch Controllerbewegungen getriggert, das aber nur höchstens
      * einmal je AnimationFrame.
      */
@@ -157,13 +157,67 @@ class Controls {
         this.sendEvent(Controls.EventType.Ready, { platform: this.platform });
     }
 
+    /**
+     * Initialisiert Touch-Eingabe auf mobilen Geräten
+     */
     initTouch() {
         this.platform = Controls.Platform.Touch;
-        // TODO: Implementieren
+        this.touchVector = new Vector2();
+        this.touchStartX = 0;
+        this.touchStartY = 0;
+        this.touchIsMoving = false;
+        this.touchMoveSpeed = 1; // Sensibilität der Kamera beim Ziehen
+        // Generell drauf drücken, wir wissen hier noch nicht, ob es ein einfaches Tippen oder ein Ziehen ist
+        window.addEventListener('touchstart', event => {
+            event.preventDefault(); // Browser soll das nicht weiter behandeln
+            let touchPoint = event.touches[0]; // Es interessiert nur ein Finger
+            this.touchVector.x = ( touchPoint.clientX / window.innerWidth ) * 2 - 1;
+            this.touchVector.y = - ( touchPoint.clientY / window.innerHeight ) * 2 + 1;
+            // Startpunkt merken, um später zu erkennen, ob man nur gedrückt oder gezogen hat
+            this.touchStartX = touchPoint.clientX;
+            this.touchStartY = touchPoint.clientY;
+            // Generell Touch Down - Event schicken und Raycasting durchführen.
+            // Der Consumer muss entscheiden, ob er was damit macht
+            this.raycaster.setFromCamera(this.touchVector, this.camera.cam3);
+            this.checkIntersection();
+            // Erst jetzt Button Event schicken, damit Consumer bereits das Ziel kennt
+            this.sendEvent(Controls.EventType.ButtonDown, { buttonType: Controls.ButtonType.Touch });
+    }, false);
+        // Beim Ziehen soll sich die Kamera bewegen
+        renderer.domElement.addEventListener('touchmove', event => {
+            event.preventDefault();
+            let touchPoint = event.touches[0];
+            this.touchVector.x = ( touchPoint.clientX / window.innerWidth ) * 2 - 1;
+	        this.touchVector.y = - ( touchPoint.clientY / window.innerHeight ) * 2 + 1;
+            var deltaX = touchPoint.clientX - this.touchStartX;
+            var deltaY = touchPoint.clientY - this.touchStartY;
+            if (!this.touchIsMoving) this.touchIsMoving = deltaX !== 0 || deltaY !== 0; // Aha, wir ziehen also
+            let min = Math.min(window.innerWidth, window.innerHeight);
+            this.camera.cam3.rotation.x += deltaY/min * this.touchMoveSpeed;
+            this.camera.head.rotation.y += deltaX/min * this.touchMoveSpeed;
+            this.touchStartX = touchPoint.clientX;
+            this.touchStartY = touchPoint.clientY;
+        }, false);
+        // Beim Loslassen nach dem Ziehen nix machen, ansonsten ButtonUp - Event 
+        // und auch Raycasting auslösen
+        renderer.domElement.addEventListener('touchend', event => {
+            event.preventDefault();
+            if (!this.touchIsMoving) {
+                this.raycaster.setFromCamera(this.touchVector, this.camera.cam3);
+                this.checkIntersection();
+                // Erst jetzt Button Event schicken, damit Consumer bereits das Ziel kennt
+                this.sendEvent(Controls.EventType.ButtonUp, { buttonType: Controls.ButtonType.Touch });
+            }
+            this.touchIsMoving = false;
+        }, false);
     }
 
     initXR() {
         // TODO: Implementieren
+
+        // Bisher gab es hier einen Fehler: Wenn man an der Quest nur einen Controller einschaltet,
+        // wird der ganze Kram als Go erkannt. Besser wäre es, die Controller auf 6DoF-Fähigkeiten
+        // zu prüfen.
     }
 
     /**
