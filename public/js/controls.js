@@ -169,7 +169,6 @@ class Controls {
         this.touchMoveSpeed = 1; // Sensibilität der Kamera beim Ziehen
         // Generell drauf drücken, wir wissen hier noch nicht, ob es ein einfaches Tippen oder ein Ziehen ist
         window.addEventListener('touchstart', event => {
-            event.preventDefault(); // Browser soll das nicht weiter behandeln
             let touchPoint = event.touches[0]; // Es interessiert nur ein Finger
             this.touchVector.x = ( touchPoint.clientX / window.innerWidth ) * 2 - 1;
             this.touchVector.y = - ( touchPoint.clientY / window.innerHeight ) * 2 + 1;
@@ -182,10 +181,9 @@ class Controls {
             this.checkIntersection();
             // Erst jetzt Button Event schicken, damit Consumer bereits das Ziel kennt
             this.sendEvent(Controls.EventType.ButtonDown, { buttonType: Controls.ButtonType.Touch });
-    }, false);
+        }, false);
         // Beim Ziehen soll sich die Kamera bewegen
-        renderer.domElement.addEventListener('touchmove', event => {
-            event.preventDefault();
+        window.addEventListener('touchmove', event => {
             let touchPoint = event.touches[0];
             this.touchVector.x = ( touchPoint.clientX / window.innerWidth ) * 2 - 1;
 	        this.touchVector.y = - ( touchPoint.clientY / window.innerHeight ) * 2 + 1;
@@ -200,8 +198,7 @@ class Controls {
         }, false);
         // Beim Loslassen nach dem Ziehen nix machen, ansonsten ButtonUp - Event 
         // und auch Raycasting auslösen
-        renderer.domElement.addEventListener('touchend', event => {
-            event.preventDefault();
+        window.addEventListener('touchend', event => {
             if (!this.touchIsMoving) {
                 this.raycaster.setFromCamera(this.touchVector, this.camera.cam3);
                 this.checkIntersection();
