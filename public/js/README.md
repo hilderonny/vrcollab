@@ -74,11 +74,30 @@ wo genau hingetippt wurde.
             vrbutton { position: fixed; z-index: 9999; top: 0; left: 0; right: 0; bottom: 0; color: red; background-color: rgba(0,0,0,.9); display: flex; justify-content: center; flex-direction: column; text-align: center; font-size: xxx-large; cursor: pointer; user-select: none; }
         </style>
         <script type="module">
-            import { SceneTemplate } from './js/scene.js';
+            import { SceneTemplate } from '../js/scene.js';
+            import { Cube, Cylinder, Sphere } from '../js/geometries.js';
 
             let sceneTemplate = new SceneTemplate();
             
             // ... Hier kommt der ganze individuelle Schnulli rein
+
+            let cube = new Cube();
+            cube.material.color.set('#4cd');
+            cube.position.set(-1, .5, -3);
+            cube.rotation.set(0, Math.PI / 4, 0);
+            sceneTemplate.scene.add(cube);
+
+            let cylinder = new Cylinder();
+            cylinder.material.color.set('#fc5');
+            cylinder.position.set(1, .75, -3);
+            cylinder.scale.set(1, 1.5, 1);
+            sceneTemplate.scene.add(cylinder);
+
+            let sphere = new Sphere();
+            sphere.material.color.set('#e25');
+            sphere.position.set(0, 1.25, -5);
+            sphere.scale.set(2.5, 2.5, 2.5);
+            sceneTemplate.scene.add(sphere);
 
         </script>
     </head>
