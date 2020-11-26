@@ -268,6 +268,10 @@ class Controls {
             // Beim Beenden Start-Button wieder anzeigen
             xrSession.addEventListener('end', () => { xrStartButton.style.display = 'flex'; });
             // Event Listener an Controller binden, siehe https://developer.mozilla.org/en-US/docs/Web/API/WebXR_Device_API/Inputs#Primary_actions
+            xrSession.addEventListener('selectstart', event => {
+                let controller = event.inputSource.controller;
+                this.sendEvent(Controls.EventType.ButtonDown, { buttonType: Controls.ButtonType.XRController, button: 'select', controller: controller });
+            });
             xrSession.addEventListener('select', event => {
                 let controller = event.inputSource.controller;
                 this.sendEvent(Controls.EventType.ButtonUp, { buttonType: Controls.ButtonType.XRController, button: 'select', controller: controller });
