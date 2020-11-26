@@ -158,7 +158,7 @@ class TeleportExtension {
      * Auf dem Mesh wird auf Zeigerbewegungen und Button Klicks reagiert
      */
     apply(meshInstance) {
-        meshInstance.addEventListener(EventExtension.EventType.ButtonUp, (_, { buttonType, button }) => this.handleButtonUp(buttonType, button));
+        meshInstance.addEventListener(EventExtension.EventType.ButtonUp, (_, { buttonType, button, controller }) => this.handleButtonUp(buttonType, button, controller));
         meshInstance.addEventListener(EventExtension.EventType.PointerLeave, () => this.handlePointerLeave());
         meshInstance.addEventListener(EventExtension.EventType.PointerMove, (_, coords) => this.handlePointerMove(coords));
     }
@@ -168,10 +168,11 @@ class TeleportExtension {
      * - linke Maustaste
      * - Touch allgemein
      */
-    handleButtonUp(buttonType, button) {
+    handleButtonUp(buttonType, button, controller) {
         if (
             (buttonType === Controls.ButtonType.Mouse && button === Controls.Button.Mouse.Left) ||
-            (buttonType === Controls.ButtonType.Touch)
+            (buttonType === Controls.ButtonType.Touch) ||
+            (buttonType === Controls.ButtonType.XRController && controller.xrInputSource.handedness === 'right' && button === 'select')
         ) {
             this.cameraInstance.head.position.copy(this.sphere.position);
         }

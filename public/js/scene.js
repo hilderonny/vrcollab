@@ -79,7 +79,6 @@ class SceneTemplate {
         this.pointerLine = new PointerLine();
         this.controls.addEventListener(Controls.EventType.ControllerConnected, (_, data) => {
             let controller = data.controller;
-            console.log(controller.xrInputSource.handedness, controller, controller.grip, this.pointerLine);
             if (controller.xrInputSource.handedness === 'right') {
                 controller.add(this.pointerLine);
             }

@@ -244,6 +244,7 @@ class Controls {
             controller.addEventListener('connected', async (event) => {
                 let inputSource = event.data;
                 controller.xrInputSource = inputSource; // Brauchen wir später in Event-Handling
+                inputSource.controller = controller;
                 // Das Laden des Modells dauert ein paar Millisekunden.
                 // Darum machen wir das asynchron, damit die Szene nicht ruckelt
                 let controllerModel = await new Promise((resolve) => {
@@ -265,7 +266,12 @@ class Controls {
         xrStartButton.addEventListener('click', async () => {
             var xrSession = await navigator.xr.requestSession('immersive-vr', { optionalFeatures: [ 'local-floor', 'bounded-floor', 'hand-tracking' ] });
             // Beim Beenden Start-Button wieder anzeigen
-            xrSession.addEventListener( 'end', () => { xrStartButton.style.display = 'flex'; });
+            xrSession.addEventListener('end', () => { xrStartButton.style.display = 'flex'; });
+            // Event Listener an Controller binden, siehe https://developer.mozilla.org/en-US/docs/Web/API/WebXR_Device_API/Inputs#Primary_actions
+            xrSession.addEventListener('select', event => {
+                let controller = event.inputSource.controller;
+                this.sendEvent(Controls.EventType.ButtonUp, { buttonType: Controls.ButtonType.XRController, button: 'select', controller: controller });
+            });
             this.renderer.xr.setSession(xrSession);
             // Start-Button ausblenden, wenn XR-Modus gestartet ist
             xrStartButton.style.display = 'none';
@@ -344,7 +350,8 @@ Controls.EventType = {
     ButtonDown: 'Controls.EventType.ButtonDown',
     /**
      * @param buttonType Controls.ButtonType des losgelassenen Buttons
-     * @param button Button-Code, der losgelassen wurde
+     * @param button Button-Code, der losgelassen wurde. Bei XR-Controllern ist das "select" oder "squeeze"
+     * @param controller Bei XR Controllern ist das die Instanz des Controllers
      */
     ButtonUp: 'Controls.EventType.ButtonUp',
     /**
