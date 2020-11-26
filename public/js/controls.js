@@ -1,4 +1,5 @@
-import { Raycaster, Vector2 } from './lib/three.module.js';
+import { Matrix4, Raycaster, Vector2 } from './lib/three.module.js';
+import { XRControllerModelFactory } from './lib/XRControllerModelFactory.js';
 
 /**
  * Verarbeitet alle Eingaben auf den verschiedenen Plattformen und versendet Events.
@@ -228,17 +229,33 @@ class Controls {
     }
 
     initXR() {
+        let controllerModelFactory = new XRControllerModelFactory();
         // XR in ThreeJS aktivieren
         this.renderer.xr.enabled = true;
         // 2 Controller pauschal vorbereiten, wir wissen hier aber noch nicht, welche Hand das sein wird
         for (let i = 0; i < 2; i++) {
             let controller = this.renderer.xr.getController(i);
             controller.grip = this.renderer.xr.getControllerGrip(i); // Verweis auf zugehörige Grip, die brauchen wir zum Objekte dranhängen
+            // Controller zur Kamera hinzufügen
+            this.camera.head.add(controller.grip);
+            this.camera.head.add(controller);
             // Erst beim Connected Event wissen wir, welche Hand wir haben
             // Das Connected Event kommt eventuell mehrmals, wenn wir den Akku rausnehmen oder einsetzen, alos jedesmal neu initialisieren
-            controller.addEventListener('connected', event => {
+            controller.addEventListener('connected', async (event) => {
                 let inputSource = event.data;
                 controller.xrInputSource = inputSource; // Brauchen wir später in Event-Handling
+                // Das Laden des Modells dauert ein paar Millisekunden.
+                // Darum machen wir das asynchron, damit die Szene nicht ruckelt
+                let controllerModel = await new Promise((resolve) => {
+                    let model = controllerModelFactory.createControllerModel(controller.grip);
+                    resolve(model);
+                });
+                controller.grip.add(controllerModel);
+                // Rechten Controller für Raycasting merken
+                if (inputSource.handedness === 'right') {
+                    controller.tempMatrix = new Matrix4(); // Wiederverwendbares Matrix-Objekt für Raycasting
+                    this.rightXRController = controller;
+                }
                 this.sendEvent(Controls.EventType.ControllerConnected, { controller: controller });
             });
         }
@@ -272,6 +289,13 @@ class Controls {
         // Tastaturbewegung
         if (this.forward !== 0) this.camera.head.translateZ(this.forward * this.moveSpeed);
         if (this.sideward !== 0) this.camera.head.translateX(this.sideward * this.moveSpeed);
+        // XR Rechter Controller zum Zeigen für Raycaster updaten
+        if (this.rightXRController) {
+            this.rightXRController.tempMatrix.identity().extractRotation(this.rightXRController.matrixWorld);
+            this.raycaster.ray.origin.setFromMatrixPosition(this.rightXRController.matrixWorld);
+            this.raycaster.ray.direction.set(0, 0, -1).applyMatrix4(this.rightXRController.tempMatrix);
+            this.checkIntersection();
+        }
     }
 
     /**

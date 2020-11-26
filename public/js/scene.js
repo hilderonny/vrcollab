@@ -76,12 +76,14 @@ class SceneTemplate {
         // Zeiger an rechten XR-Controller hängen, wenn es einen gibt
         // TODO: Das geht hier noch nicht. Wir müssen warten, bis ein
         // Connected-Event kommt... und dieses auch implementieren
-        let rightXRController = this.controls.rightXRController;
-        if (rightXRController) {
-            let pointerLine = new PointerLine();
-            console.log(rightXRController);
-            rightXRController.add(pointerLine);
-        }
+        this.pointerLine = new PointerLine();
+        this.controls.addEventListener(Controls.EventType.ControllerConnected, (_, data) => {
+            let controller = data.controller;
+            console.log(controller.xrInputSource.handedness, controller, controller.grip, this.pointerLine);
+            if (controller.xrInputSource.handedness === 'right') {
+                controller.add(this.pointerLine);
+            }
+        });
 
         // Einmalig resizen, damit der Canvas so groß wie das Browserfenster wird
         this.resize();
