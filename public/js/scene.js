@@ -1,10 +1,22 @@
 import { AmbientLight, BackSide, DirectionalLight, Mesh, MeshBasicMaterial, PlaneGeometry, Scene, SphereGeometry, WebGLRenderer} from './lib/three.module.js';
 import { Camera } from './camera.js';
 import { Controls } from './controls.js';
+import { EventExtension } from './extensions.js';
 
 /**
  * Vorlage für alle möglichen Szenen-Demos.
  * Initialisiert Umgebung, Kamera, Licht, etc.
+ * 
+ * @example Properties:
+ * this.renderer (WebGLRenderer)
+ * this.scene (Scene)
+ * this.ground (Mesh)
+ * this.sky (Mesh)
+ * this.sunLight (DirectionalLight)
+ * this.ambientLight (AmbientLight)
+ * this.camera (Camera)
+ * this.controls (Controls)
+ * this.eventExtension (EventExtension)
  */
 class SceneTemplate {
 
@@ -43,6 +55,8 @@ class SceneTemplate {
         this.scene.add(this.camera.head);
         // Bewegungskontrollen initialisieren. Die brauchen aber nicht der Szene hinzugefügt werden
         this.controls = new Controls(this.camera, []);
+        // EventExtension vorbereiten
+        this.eventExtension = new EventExtension(this.controls);
         // Einmalig resizen, damit der Canvas so groß wie das Browserfenster wird
         this.resize();
         this.renderer.setAnimationLoop(() => this.animationLoop());

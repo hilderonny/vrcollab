@@ -11,6 +11,7 @@
         <script type="module">
             import { SceneTemplate } from '../js/scene.js';
             import { Cube, Cylinder, Sphere } from '../js/geometries.js';
+            import { EventExtension } from '../js/extensions.js';
 
             let sceneTemplate = new SceneTemplate();
             
@@ -21,18 +22,23 @@
             cube.position.set(-1, .5, -3);
             cube.rotation.set(0, Math.PI / 4, 0);
             sceneTemplate.scene.add(cube);
+            sceneTemplate.eventExtension.apply(cube);
 
             let cylinder = new Cylinder();
             cylinder.material.color.set('#fc5');
             cylinder.position.set(1, .75, -3);
             cylinder.scale.set(1, 1.5, 1);
             sceneTemplate.scene.add(cylinder);
+            sceneTemplate.eventExtension.apply(cylinder);
+            cylinder.addEventListener(EventExtension.EventType.PointerLeave, (targetObject) => console.log('ZYLLI: ', cylinder, targetObject));
 
             let sphere = new Sphere();
             sphere.material.color.set('#e25');
             sphere.position.set(0, 1.25, -5);
             sphere.scale.set(2.5, 2.5, 2.5);
             sceneTemplate.scene.add(sphere);
+            sceneTemplate.eventExtension.apply(sphere);
+            sphere.addEventListener(EventExtension.EventType.PointerLeave, (targetObject) => console.log('KUGLI: ', sphere, targetObject));
 
         </script>
     </head>

@@ -71,6 +71,8 @@ class Controls {
         this.raycaster = new Raycaster();
         this.raycaster.near = .05; // Abstand mindestens 5 cm
         this.raycaster.far = 20; // Höchstens 20 meter entfernt
+        // Aktuelle Intersection für Leave-Events merken
+        this.currentIntersection = null;
     }
 
     addEventListener(event, listener) {
@@ -87,8 +89,20 @@ class Controls {
      */
     checkIntersection() {
         let intersects = this.raycaster.intersectObjects(this.raycastableObjects);
-        if (intersects.length < 1) return;
-        this.sendEvent(Controls.EventType.PointerUpdate, intersects[0]);
+        if (intersects.length < 1) {
+            if (this.currentIntersection) {
+                this.sendEvent(Controls.EventType.PointerLeave, this.currentIntersection);
+            }
+            this.currentIntersection = null;
+            return;
+        } else {
+            let intersection = intersects[0];
+            if (this.currentIntersection && this.currentIntersection.object !== intersection.object) {
+                this.sendEvent(Controls.EventType.PointerLeave, this.currentIntersection);
+            }
+            this.currentIntersection = intersection;
+            this.sendEvent(Controls.EventType.PointerUpdate, this.currentIntersection);
+        }
     }
 
     /**
@@ -264,18 +278,33 @@ Controls.ButtonType = {
 }
 
 Controls.EventType = {
-    ButtonDown: 'ControlsEventTypeButtonDown',
-    ButtonUp: 'ControlsEventTypeButtonUp',
-    PointerUpdate: 'ControlsEventTypePointerUpdate',
-    Ready: 'ControlsEventTypeReady',
+    /**
+     * @param buttonType Controls.ButtonType des gedrückten Buttons
+     * @param button Button-Code, der gedrückt wurde
+     */
+    ButtonDown: 'Controls.EventType.ButtonDown',
+    /**
+     * @param buttonType Controls.ButtonType des losgelassenen Buttons
+     * @param button Button-Code, der losgelassen wurde
+     */
+    ButtonUp: 'Controls.EventType.ButtonUp',
+    /**
+     * @param intersection Infos über die vormalige Zeiger-Intersection, siehe https://threejs.org/docs/#api/en/core/Raycaster.intersectObject
+     */
+    PointerLeave: 'Controls.EventType.PointerLeave',
+    /**
+     * @param intersection Infos über die Zeiger-Intersection, siehe https://threejs.org/docs/#api/en/core/Raycaster.intersectObject
+     */
+    PointerUpdate: 'Controls.EventType.PointerUpdate',
+    Ready: 'Controls.EventType.Ready',
 };
 
 Controls.Platform = {
-    Desktop: 'ControlsPlatformDesktop',
-    Touch: 'ControlsPlatformTouch',
-    XR1: 'ControlsPlatformXR1',
-    XR2: 'ControlsPlatformXR2',
-    Hand: 'ControlsPlatformHand',
+    Desktop: 'Controls.Platform.Desktop',
+    Touch: 'Controls.Platform.Touch',
+    XR1: 'Controls.Platform.XR1',
+    XR2: 'Controls.Platform.XR2',
+    Hand: 'Controls.Platform.Hand',
 }
 
 export { Controls }
