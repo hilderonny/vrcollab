@@ -1,4 +1,4 @@
-import { BoxBufferGeometry, CylinderBufferGeometry, Mesh, MeshLambertMaterial, SphereBufferGeometry } from './lib/three.module.js';
+import { BoxBufferGeometry, CylinderBufferGeometry, Mesh, MeshLambertMaterial, PlaneBufferGeometry, SphereBufferGeometry } from './lib/three.module.js';
 
 /**
  * Enthält Standardgeometrien für Quader, Zylinder, Kugeln und Flächen
@@ -27,6 +27,17 @@ class Cylinder extends Mesh {
 
 }
 
+class Plane extends Mesh {
+
+    constructor() {
+        super();
+        this.geometry = new PlaneBufferGeometry( );
+        this.material = new MeshLambertMaterial( {color: '#ddd'} );
+        this.updateMorphTargets();
+    }
+
+}
+
 class Sphere extends Mesh {
 
     constructor() {
@@ -39,4 +50,4 @@ class Sphere extends Mesh {
 }
 
 
-export { Cube, Cylinder, Sphere };
+export { Cube, Cylinder, Plane, Sphere };

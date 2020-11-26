@@ -1,6 +1,7 @@
 // Funktionserweiterungen für Meshes.
 
-import { Controls } from "./controls.js";
+import { Controls } from './controls.js';
+import { Sphere } from './geometries.js';
 
 /**
  * Bringt eine Mesh dazu, pointer-Events zu schicken und hat Event-Listener.
@@ -15,9 +16,9 @@ import { Controls } from "./controls.js";
  * // Zeigerstrahl verlässt Objekt
  * cube.addEventListener(EventExtension.EventType.PointerLeave, (targetObject) => { ... });
  * // Button wird gedrückt während Zeiger auf Objekt zeigt
- * cube.addEventListener(EventExtension.EventType.ButtonDown, (targetObject, buttonType, button) => { ... });
+ * cube.addEventListener(EventExtension.EventType.ButtonDown, (targetObject, { buttonType, button }) => { ... });
  * // Button wird losgelassen während Zeiger auf Objekt zeigt
- * cube.addEventListener(EventExtension.EventType.ButtonUp, (targetObject, buttonType, button) => { ... });
+ * cube.addEventListener(EventExtension.EventType.ButtonUp, (targetObject, { buttonType, button }) => { ... });
 */
 class EventExtension {
 
@@ -29,7 +30,7 @@ class EventExtension {
         // Listener für diverse Events registrieren
         this.controlsInstance.addEventListener(Controls.EventType.ButtonDown, (_, buttonType, button) => this.handleButtonDown(buttonType, button));
         this.controlsInstance.addEventListener(Controls.EventType.ButtonUp, (_, buttonType, button) => this.handleButtonUp(buttonType, button));
-        this.controlsInstance.addEventListener(Controls.EventType.PointerLeave, (_, intersection) => this.handlePointerLeave(intersection));
+        this.controlsInstance.addEventListener(Controls.EventType.PointerLeave, () => this.handlePointerLeave());
         this.controlsInstance.addEventListener(Controls.EventType.PointerUpdate, (_, intersection) => this.handlePointerUpdate(intersection));
         // Gerade angezieltes Objekt, an dieses werden Button Events geschickt
         this.currentIntersectedObject = null;
@@ -57,24 +58,28 @@ class EventExtension {
         this.controlsInstance.raycastableObjects.push(meshInstance); // Mesh dem Raycaster der Controls-Instanz bekannt machen
     }
 
-    handleButtonDown(buttonType, button) {
-        console.log(this, buttonType, button);
-    }
-
-    handleButtonUp(buttonType, button) {
-        console.log(this, buttonType, button);
-    }
-
-    handlePointerLeave(intersection) {
+    handleButtonDown(eventDetails) {
         if (this.currentIntersectedObject) {
-            this.currentIntersectedObject.sendEvent(EventExtension.EventType.PointerLeave, 'furz', 'Ähustebn');
+            this.currentIntersectedObject.sendEvent(EventExtension.EventType.ButtonDown, eventDetails);
+        }
+    }
+
+    handleButtonUp(eventDetails) {
+        if (this.currentIntersectedObject) {
+            this.currentIntersectedObject.sendEvent(EventExtension.EventType.ButtonUp, eventDetails);
+        }
+    }
+
+    handlePointerLeave() {
+        if (this.currentIntersectedObject) {
+            this.currentIntersectedObject.sendEvent(EventExtension.EventType.PointerLeave);
         }
         this.currentIntersectedObject = null;
     }
 
     handlePointerUpdate(intersection) {
-        //console.log(this, intersection);
         this.currentIntersectedObject = intersection.object;
+        this.currentIntersectedObject.sendEvent(EventExtension.EventType.PointerMove, intersection.point);
     }
 
     /**
@@ -106,17 +111,83 @@ EventExtension.EventType = {
     /**
      * Button wird gedrückt während Zeiger auf Objekt zeigt
      * @param targetObject Objekt, auf den der Zeiger zeigt
-     * @param buttonType Controls.ButtonType des gedrückten Buttons
-     * @param button Button-Code, der gedrückt wurde
+     * @param eventDetails.buttonType Controls.ButtonType des gedrückten Buttons
+     * @param eventDetails.button Button-Code, der gedrückt wurde
      */
     ButtonDown: 'EventExtension.EventType.ButtonDown',
     /**
      * Button wird losgelassen während Zeiger auf Objekt zeigt
      * @param targetObject Objekt, auf den der Zeiger zeigt
-     * @param buttonType Controls.ButtonType des losgelassenen Buttons
-     * @param button Button-Code, der losgelassen wurde
+     * @param eventDetails.buttonType Controls.ButtonType des losgelassenen Buttons
+     * @param eventDetails.button Button-Code, der losgelassen wurde
      */
     ButtonUp: 'EventExtension.EventType.ButtonUp',
 }
 
-export { EventExtension }
+/**
+ * Beim Zeigen auf ein solch erweitertes Objekt wird eine Zielkugel angezeigt.
+ * Beim Anklicken oder Tippen oder Triggern teleportiert der Benutzer dort hin.
+ * Muss nach EventExtension hinzugefügt werden, weil es die addEventListener() Methode
+ * des Zielobjektes verwendet.
+ * 
+ * @example
+ * 
+ * let controls = new Controls();
+ * let camera = new Camera();
+ * let cube = new Cube();
+ * let eventExtension = new EventExtension(controls);
+ * eventExtension.apply(cube);
+ * let teleportExtension = new TeleportExtension(camera);
+ * teleportExtension.apply(cube);
+ */
+class TeleportExtension {
+
+    /**
+     * @param {Camera} cameraInstance Instanz der Kamera, die beim Teleportieren bewegt wird
+     */
+    constructor(cameraInstance) {
+        this.cameraInstance = cameraInstance;
+        this.sphere = new Sphere();
+        this.sphere.material.color.set('#f60');
+        this.sphere.scale.set(.1, .1, .1);
+        this.sphere.visible = false;
+        this.cameraInstance.head.parent.add(this.sphere); // Das ist die Szene selbst. Dazu muss die Kamera vorher der Szene hinzugefügt worden sein
+    }
+    
+    /**
+     * Auf dem Mesh wird auf Zeigerbewegungen und Button Klicks reagiert
+     */
+    apply(meshInstance) {
+        meshInstance.addEventListener(EventExtension.EventType.ButtonUp, (_, { buttonType, button }) => this.handleButtonUp(buttonType, button));
+        meshInstance.addEventListener(EventExtension.EventType.PointerLeave, () => this.handlePointerLeave());
+        meshInstance.addEventListener(EventExtension.EventType.PointerMove, (_, coords) => this.handlePointerMove(coords));
+    }
+
+    /**
+     * Zeiger muss sich auf Mesh befinden. Triggert bei:
+     * - linke Maustaste
+     * - Touch allgemein
+     */
+    handleButtonUp(buttonType, button) {
+        if (
+            (buttonType === Controls.ButtonType.Mouse && button === Controls.Button.Mouse.Left) ||
+            (buttonType === Controls.ButtonType.Touch)
+        ) {
+            this.cameraInstance.head.position.copy(this.sphere.position);
+        }
+    }
+
+    handlePointerLeave() {
+        // Die Teleportzielkugel soll nicht mehr sichtbar sein, wenn kein gültiges Ziel anvisiert wird
+        this.sphere.visible = false;
+    }
+
+    handlePointerMove(coords) {
+        // Teleportzielkugel unter Zeigerauftreffpunkt anzeigen
+        this.sphere.visible = true;
+        this.sphere.position.copy(coords);
+    }
+
+}
+
+export { EventExtension, TeleportExtension }

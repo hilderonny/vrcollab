@@ -1,7 +1,8 @@
 import { AmbientLight, BackSide, DirectionalLight, Mesh, MeshBasicMaterial, PlaneGeometry, Scene, SphereGeometry, WebGLRenderer} from './lib/three.module.js';
 import { Camera } from './camera.js';
 import { Controls } from './controls.js';
-import { EventExtension } from './extensions.js';
+import { EventExtension, TeleportExtension } from './extensions.js';
+import { Plane, Sphere } from './geometries.js';
 
 /**
  * Vorlage für alle möglichen Szenen-Demos.
@@ -10,13 +11,15 @@ import { EventExtension } from './extensions.js';
  * @example Properties:
  * this.renderer (WebGLRenderer)
  * this.scene (Scene)
- * this.ground (Mesh)
- * this.sky (Mesh)
+ * this.ground (Plane)
+ * this.sky (Sphere)
+ * this.sun (Sphere)
  * this.sunLight (DirectionalLight)
  * this.ambientLight (AmbientLight)
  * this.camera (Camera)
  * this.controls (Controls)
  * this.eventExtension (EventExtension)
+ * this.teleportExtension (TeleportExtension)
  */
 class SceneTemplate {
 
@@ -29,27 +32,6 @@ class SceneTemplate {
         window.addEventListener('resize', () => this.resize());
         // Umgebung und Kamera initialisieren
         this.scene = new Scene();
-        // Teleportierbarer Boden, durch TeleportMesh ersetzen
-        this.ground = new Mesh(
-            new PlaneGeometry(this.sceneRadius * 2, this.sceneRadius * 2, 1, 1),
-            new MeshBasicMaterial({ color: 0x4caf50 }) // Farbe des Bodens
-        );
-        this.ground.rotation.x = -Math.PI / 2;
-        this.scene.add(this.ground);
-        // Himmel
-        this.sky = new Mesh(
-            new SphereGeometry(this.sceneRadius, 50, 50, 0, 2 * Math.PI),
-            new MeshBasicMaterial({ side: BackSide, depthWrite: false, color: 0x00bcd4 })
-        );
-        this.scene.add(this.sky);
-        // Sonnenlicht von schräg oben
-        this.sunLight = new DirectionalLight( '#fff', 1 );
-        this.sunLight.position.x = -.7;
-        this.sunLight.position.z = .5;
-        this.scene.add(this.sunLight);
-        // Ambiente Hintergrundbeleuchtung
-        this.ambientLight = new AmbientLight( '#888' );
-        this.scene.add(this.ambientLight);
         // Kamera
         this.camera = new Camera();
         this.scene.add(this.camera.head);
@@ -57,6 +39,40 @@ class SceneTemplate {
         this.controls = new Controls(this.camera, []);
         // EventExtension vorbereiten
         this.eventExtension = new EventExtension(this.controls);
+        // TeleportExtension vorbereiten
+        this.teleportExtension = new TeleportExtension(this.camera);
+
+        // Diverse Inhalte der Szenenvorlage
+
+        // Teleportierbarer Boden
+        this.ground = new Plane();
+        this.ground.geometry.scale(this.sceneRadius * 2, this.sceneRadius * 2, 1);
+        this.ground.rotation.x = -Math.PI / 2;
+        this.ground.material.color.set('#4a5');
+        this.scene.add(this.ground);
+        this.eventExtension.apply(this.ground);
+        this.teleportExtension.apply(this.ground);
+        // Himmel
+        this.sky = new Sphere();
+        this.sky.geometry.scale(this.sceneRadius * 10, this.sceneRadius * 10, this.sceneRadius * 10);
+        this.sky.material.side = BackSide;
+        this.sky.material.depthWrite = false;
+        this.sky.material.color.set('#0bd');
+        this.scene.add(this.sky);
+        // Sonne und Sonnenlicht von schräg oben
+        this.sun = new Sphere();
+        this.sun.geometry.scale(5, 5, 5);
+        this.sun.material.color.set('#ff0');
+        this.sun.material.emissive.set('#ff0');
+        this.sun.position.set(-70, 100, 50);
+        this.scene.add(this.sun);
+        this.sunLight = new DirectionalLight( '#fff', 1 );
+        this.sunLight.position.set(-70, 100, 50);
+        this.scene.add(this.sunLight);
+        // Ambiente Hintergrundbeleuchtung
+        this.ambientLight = new AmbientLight( '#888' );
+        this.scene.add(this.ambientLight);
+
         // Einmalig resizen, damit der Canvas so groß wie das Browserfenster wird
         this.resize();
         this.renderer.setAnimationLoop(() => this.animationLoop());

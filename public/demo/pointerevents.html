@@ -11,7 +11,23 @@
         <script type="module">
             import { SceneTemplate } from '../js/scene.js';
             import { Cube, Cylinder, Sphere } from '../js/geometries.js';
-            import { EventExtension } from '../js/extensions.js';
+            import { EventExtension, TeleportExtension } from '../js/extensions.js';
+
+            function handleButtonDown(targetObject, {buttonType, button}) {
+                console.log('Button DOWN on ' + targetObject.constructor.name, buttonType, button);
+            }
+
+            function handleButtonUp(targetObject, {buttonType, button}) {
+                console.log('Button UP on ' + targetObject.constructor.name, buttonType, button);
+            }
+
+            function handlePointerLeave(targetObject) {
+                console.log('Left ' + targetObject.constructor.name);
+            }
+
+            function handlePointerMove(targetObject, coords) {
+                console.log('Moving on ' + targetObject.constructor.name, coords);
+            }
 
             let sceneTemplate = new SceneTemplate();
             
@@ -23,6 +39,7 @@
             cube.rotation.set(0, Math.PI / 4, 0);
             sceneTemplate.scene.add(cube);
             sceneTemplate.eventExtension.apply(cube);
+            sceneTemplate.teleportExtension.apply(cube);
 
             let cylinder = new Cylinder();
             cylinder.material.color.set('#fc5');
@@ -30,15 +47,16 @@
             cylinder.scale.set(1, 1.5, 1);
             sceneTemplate.scene.add(cylinder);
             sceneTemplate.eventExtension.apply(cylinder);
-            cylinder.addEventListener(EventExtension.EventType.PointerLeave, (targetObject) => console.log('ZYLLI: ', cylinder, targetObject));
+            cylinder.addEventListener(EventExtension.EventType.PointerLeave, handlePointerLeave);
+            cylinder.addEventListener(EventExtension.EventType.PointerMove, handlePointerMove);
+            cylinder.addEventListener(EventExtension.EventType.ButtonDown, handleButtonDown);
+            cylinder.addEventListener(EventExtension.EventType.ButtonUp, handleButtonUp);
 
             let sphere = new Sphere();
             sphere.material.color.set('#e25');
             sphere.position.set(0, 1.25, -5);
             sphere.scale.set(2.5, 2.5, 2.5);
             sceneTemplate.scene.add(sphere);
-            sceneTemplate.eventExtension.apply(sphere);
-            sphere.addEventListener(EventExtension.EventType.PointerLeave, (targetObject) => console.log('KUGLI: ', sphere, targetObject));
 
         </script>
     </head>

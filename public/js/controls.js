@@ -268,13 +268,21 @@ Controls.ButtonType = {
      * Event-Daten enthalten zusätzlich als "button" den keyCode (z.B. 65 bei "A" und "a")
      * und in "key" das Zeichen der Taste ("A" vs. "a")
      */
-    Keyboard: 'ControlsButtonTypeKeyboard',
+    Keyboard: 'Controls.ButtonType.Keyboard',
     /**
      * Im "button" Attribut ist die Maustaste drin (0 = links, 1 = Mitte, 2 = Rechts)
      */
-    Mouse: 'ControlsButtonTypeMouse',
-    Touch: 'ControlsButtonTypeTouch',
-    XRController: 'ControlsButtonTypeXRController',
+    Mouse: 'Controls.ButtonType.Mouse',
+    Touch: 'Controls.ButtonType.Touch',
+    XRController: 'Controls.ButtonType.XRController',
+}
+
+Controls.Button = {
+    Mouse: {
+        Left: 0,
+        Right: 1,
+        Middle: 2,
+    }
 }
 
 Controls.EventType = {
