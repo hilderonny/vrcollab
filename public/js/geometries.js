@@ -1,4 +1,4 @@
-import { BoxBufferGeometry, CylinderBufferGeometry, Mesh, MeshLambertMaterial, PlaneBufferGeometry, SphereBufferGeometry } from './lib/three.module.js';
+import { AdditiveBlending, BoxBufferGeometry, BufferGeometry, CylinderBufferGeometry, Float32BufferAttribute, Line, LineBasicMaterial, Mesh, MeshLambertMaterial, PlaneBufferGeometry, SphereBufferGeometry } from './lib/three.module.js';
 
 /**
  * Enthält Standardgeometrien für Quader, Zylinder, Kugeln und Flächen
@@ -38,6 +38,17 @@ class Plane extends Mesh {
 
 }
 
+class PointerLine extends Line {
+
+    constructor() {
+        super();
+        this.geometry = new BufferGeometry(); // Ziellinie
+        this.geometry.setAttribute( 'position', new Float32BufferAttribute( [ 0, 0, 0, 0, 0, - 1 ], 3 ) );
+        this.geometry.setAttribute( 'color', new Float32BufferAttribute( [ 0.5, 0.5, 0.5, 0, 0, 0 ], 3 ) );
+        this.material = new LineBasicMaterial( { vertexColors: true, blending: AdditiveBlending } );
+    }
+}
+
 class Sphere extends Mesh {
 
     constructor() {
@@ -50,4 +61,4 @@ class Sphere extends Mesh {
 }
 
 
-export { Cube, Cylinder, Plane, Sphere };
+export { Cube, Cylinder, Plane, PointerLine, Sphere };

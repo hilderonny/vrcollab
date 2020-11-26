@@ -38,10 +38,12 @@ import { Raycaster, Vector2 } from './lib/three.module.js';
 class Controls {
 
     /**
-     * @param {*} camera Die Kamera wird auf Desktop und Touch bewegt
+     * @param {Camera} camera Die Kamera wird auf Desktop und Touch bewegt
+     * @param {WebGLRenderer} renderer Renderer-Instanz. Wird für XR benötigt, um in XR-Modus umzuschalten.
      * @param {*} raycastableObjects Array von Objekten, die auf Raycasting reagieren. Nur diese verursachen ein PointerUpdate Event.
      */
-    constructor(camera, raycastableObjects) {
+    constructor(camera, renderer, raycastableObjects) {
+        this.renderer = renderer;
         // An window werden die Event Listener für Maus, Touch, etc. gebunden
         // Alle Objekte, die für Raycaster in Frage kommen
         this.raycastableObjects = raycastableObjects ? raycastableObjects : [];
@@ -212,7 +214,7 @@ class Controls {
         }, false);
         // Beim Loslassen nach dem Ziehen nix machen, ansonsten ButtonUp - Event 
         // und auch Raycasting auslösen
-        window.addEventListener('touchend', event => {
+        window.addEventListener('touchend', () => {
             if (!this.touchIsMoving) {
                 this.raycaster.setFromCamera(this.touchVector, this.camera.cam3);
                 this.checkIntersection();
@@ -221,14 +223,39 @@ class Controls {
             }
             this.touchIsMoving = false;
         }, false);
+        // Ready melden
+        this.sendEvent(Controls.EventType.Ready, { platform: this.platform });
     }
 
     initXR() {
-        // TODO: Implementieren
-
-        // Bisher gab es hier einen Fehler: Wenn man an der Quest nur einen Controller einschaltet,
-        // wird der ganze Kram als Go erkannt. Besser wäre es, die Controller auf 6DoF-Fähigkeiten
-        // zu prüfen.
+        // XR in ThreeJS aktivieren
+        this.renderer.xr.enabled = true;
+        // 2 Controller pauschal vorbereiten, wir wissen hier aber noch nicht, welche Hand das sein wird
+        for (let i = 0; i < 2; i++) {
+            let controller = this.renderer.xr.getController(i);
+            controller.grip = this.renderer.xr.getControllerGrip(i); // Verweis auf zugehörige Grip, die brauchen wir zum Objekte dranhängen
+            // Erst beim Connected Event wissen wir, welche Hand wir haben
+            // Das Connected Event kommt eventuell mehrmals, wenn wir den Akku rausnehmen oder einsetzen, alos jedesmal neu initialisieren
+            controller.addEventListener('connected', event => {
+                let inputSource = event.data;
+                controller.xrInputSource = inputSource; // Brauchen wir später in Event-Handling
+                this.sendEvent(Controls.EventType.ControllerConnected, { controller: controller });
+            });
+        }
+        // Start-Button erstellen und einblenden
+        var xrStartButton = document.createElement('vrbutton');
+        xrStartButton.innerHTML = 'Enter VR';
+        xrStartButton.addEventListener('click', async () => {
+            var xrSession = await navigator.xr.requestSession('immersive-vr', { optionalFeatures: [ 'local-floor', 'bounded-floor', 'hand-tracking' ] });
+            // Beim Beenden Start-Button wieder anzeigen
+            xrSession.addEventListener( 'end', () => { xrStartButton.style.display = 'flex'; });
+            this.renderer.xr.setSession(xrSession);
+            // Start-Button ausblenden, wenn XR-Modus gestartet ist
+            xrStartButton.style.display = 'none';
+            // Ready melden, Controller kommen asynchron nach, können aber schon benutzt werden
+            this.sendEvent(Controls.EventType.Ready, { platform: this.platform });
+        });
+        document.body.appendChild(xrStartButton);
     }
 
     /**
@@ -296,6 +323,11 @@ Controls.EventType = {
      * @param button Button-Code, der losgelassen wurde
      */
     ButtonUp: 'Controls.EventType.ButtonUp',
+    /**
+     * Wenn XR-Controller angeschlossen werden
+     * @param controller XR Controller-Instanz mit grip und xrInputSource Attributen
+     */
+    ControllerConnected: 'Controls.EventType.ControllerConnected',
     /**
      * @param intersection Infos über die vormalige Zeiger-Intersection, siehe https://threejs.org/docs/#api/en/core/Raycaster.intersectObject
      */

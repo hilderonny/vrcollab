@@ -33,6 +33,7 @@
             
             // ... Hier kommt der ganze individuelle Schnulli rein
 
+            // Auf den Würfel kann man teleportieren
             let cube = new Cube();
             cube.material.color.set('#4cd');
             cube.position.set(-1, .5, -3);
@@ -41,6 +42,7 @@
             sceneTemplate.eventExtension.apply(cube);
             sceneTemplate.teleportExtension.apply(cube);
 
+            // Der Zylinder zeigt alle Events in der Konsole an
             let cylinder = new Cylinder();
             cylinder.material.color.set('#fc5');
             cylinder.position.set(1, .75, -3);
@@ -52,6 +54,7 @@
             cylinder.addEventListener(EventExtension.EventType.ButtonDown, handleButtonDown);
             cylinder.addEventListener(EventExtension.EventType.ButtonUp, handleButtonUp);
 
+            // Die Kugel ... liegt einfach rum
             let sphere = new Sphere();
             sphere.material.color.set('#e25');
             sphere.position.set(0, 1.25, -5);

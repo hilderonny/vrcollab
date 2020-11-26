@@ -2,7 +2,7 @@ import { AmbientLight, BackSide, DirectionalLight, Mesh, MeshBasicMaterial, Plan
 import { Camera } from './camera.js';
 import { Controls } from './controls.js';
 import { EventExtension, TeleportExtension } from './extensions.js';
-import { Plane, Sphere } from './geometries.js';
+import { Plane, PointerLine, Sphere } from './geometries.js';
 
 /**
  * Vorlage für alle möglichen Szenen-Demos.
@@ -36,7 +36,7 @@ class SceneTemplate {
         this.camera = new Camera();
         this.scene.add(this.camera.head);
         // Bewegungskontrollen initialisieren. Die brauchen aber nicht der Szene hinzugefügt werden
-        this.controls = new Controls(this.camera, []);
+        this.controls = new Controls(this.camera, this.renderer, []);
         // EventExtension vorbereiten
         this.eventExtension = new EventExtension(this.controls);
         // TeleportExtension vorbereiten
@@ -72,6 +72,16 @@ class SceneTemplate {
         // Ambiente Hintergrundbeleuchtung
         this.ambientLight = new AmbientLight( '#888' );
         this.scene.add(this.ambientLight);
+
+        // Zeiger an rechten XR-Controller hängen, wenn es einen gibt
+        // TODO: Das geht hier noch nicht. Wir müssen warten, bis ein
+        // Connected-Event kommt... und dieses auch implementieren
+        let rightXRController = this.controls.rightXRController;
+        if (rightXRController) {
+            let pointerLine = new PointerLine();
+            console.log(rightXRController);
+            rightXRController.add(pointerLine);
+        }
 
         // Einmalig resizen, damit der Canvas so groß wie das Browserfenster wird
         this.resize();
