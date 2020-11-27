@@ -172,7 +172,7 @@ class TeleportExtension {
         if (
             (buttonType === Controls.ButtonType.Mouse && button === Controls.Button.Mouse.Left) ||
             (buttonType === Controls.ButtonType.Touch) ||
-            (buttonType === Controls.ButtonType.XRController && controller.xrInputSource.handedness === 'right' && button === 'select')
+            (buttonType === Controls.ButtonType.XRController && controller.xrInputSource.handedness === 'right' && button === Controls.Button.XR.Right.Trigger)
         ) {
             this.cameraInstance.head.position.copy(this.sphere.position);
         }

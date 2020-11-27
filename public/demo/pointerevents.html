@@ -13,12 +13,12 @@
             import { Cube, Cylinder, Sphere } from '../js/geometries.js';
             import { EventExtension, TeleportExtension } from '../js/extensions.js';
 
-            function handleButtonDown(targetObject, {buttonType, button}) {
-                console.log('Button DOWN on ' + targetObject.constructor.name, buttonType, button);
+            function handleButtonDown(targetObject, {buttonType, button, controller}) {
+                console.log('Button DOWN on ' + targetObject.constructor.name, buttonType, button, controller?.xrInputSource.handedness);
             }
 
-            function handleButtonUp(targetObject, {buttonType, button}) {
-                console.log('Button UP on ' + targetObject.constructor.name, buttonType, button);
+            function handleButtonUp(targetObject, {buttonType, button, controller}) {
+                console.log('Button UP on ' + targetObject.constructor.name, buttonType, button, controller?.xrInputSource.handedness);
             }
 
             function handlePointerLeave(targetObject) {

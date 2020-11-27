@@ -232,6 +232,9 @@ class Controls {
         let controllerModelFactory = new XRControllerModelFactory();
         // XR in ThreeJS aktivieren
         this.renderer.xr.enabled = true;
+        // Die Buttons und Achsen werden über die GamePad API einmal je Frame abgefragt
+        // Als Key wird die Hand des Controllers verwendet, falls die Connected Events mehrfach kommen
+        this.inputSources = {};
         // 2 Controller pauschal vorbereiten, wir wissen hier aber noch nicht, welche Hand das sein wird
         for (let i = 0; i < 2; i++) {
             let controller = this.renderer.xr.getController(i);
@@ -245,6 +248,7 @@ class Controls {
                 let inputSource = event.data;
                 controller.xrInputSource = inputSource; // Brauchen wir später in Event-Handling
                 inputSource.controller = controller;
+                this.inputSources[inputSource.handedness] = inputSource;
                 // Das Laden des Modells dauert ein paar Millisekunden.
                 // Darum machen wir das asynchron, damit die Szene nicht ruckelt
                 let controllerModel = await new Promise((resolve) => {
@@ -267,15 +271,6 @@ class Controls {
             var xrSession = await navigator.xr.requestSession('immersive-vr', { optionalFeatures: [ 'local-floor', 'bounded-floor', 'hand-tracking' ] });
             // Beim Beenden Start-Button wieder anzeigen
             xrSession.addEventListener('end', () => { xrStartButton.style.display = 'flex'; });
-            // Event Listener an Controller binden, siehe https://developer.mozilla.org/en-US/docs/Web/API/WebXR_Device_API/Inputs#Primary_actions
-            xrSession.addEventListener('selectstart', event => {
-                let controller = event.inputSource.controller;
-                this.sendEvent(Controls.EventType.ButtonDown, { buttonType: Controls.ButtonType.XRController, button: 'select', controller: controller });
-            });
-            xrSession.addEventListener('select', event => {
-                let controller = event.inputSource.controller;
-                this.sendEvent(Controls.EventType.ButtonUp, { buttonType: Controls.ButtonType.XRController, button: 'select', controller: controller });
-            });
             this.renderer.xr.setSession(xrSession);
             // Start-Button ausblenden, wenn XR-Modus gestartet ist
             xrStartButton.style.display = 'none';
@@ -305,6 +300,42 @@ class Controls {
             this.raycaster.ray.origin.setFromMatrixPosition(this.rightXRController.matrixWorld);
             this.raycaster.ray.direction.set(0, 0, -1).applyMatrix4(this.rightXRController.tempMatrix);
             this.checkIntersection();
+        }
+        for (let inputSource of Object.values(this.inputSources)) {
+            this.processInputSource(inputSource);
+        }
+    }
+
+    /**
+     * Prüft in der XR die Controller-Buttons und Achsen über die Gamepad
+     * API und verschickt bei Änderung Events.
+     * Muss im AnimationFrame gemacht werden.
+     * 
+     * Buttons:
+     * 0 = Trigger
+     * 1 = Grip
+     * 2 = -
+     * 3 = Thumbstick
+     * 4 = A (rechts), X (links)
+     * 5 = B (links), Y (rechts)
+     * 
+     * Achsen:
+     * 0 = -
+     * 1 = -
+     * 2 = X (-1.0 ... +1.0)
+     * 3 = Y (-1.0 ... +1.0)
+     */
+    processInputSource(inputSource) {
+        console.log(inputSource.gamepad.axes);
+        for (let i = 0; i < inputSource.gamepad.buttons.length; i++) {
+            let button = inputSource.gamepad.buttons[i];
+            if (button.pressed && !button.pressedBefore) {
+                button.pressedBefore = true;
+                this.sendEvent(Controls.EventType.ButtonDown, { buttonType: Controls.ButtonType.XRController, button: i, controller: inputSource.controller });
+            } else if (!button.pressed && button.pressedBefore) {
+                button.pressedBefore = false;
+                this.sendEvent(Controls.EventType.ButtonUp, { buttonType: Controls.ButtonType.XRController, button: i, controller: inputSource.controller });
+            }
         }
     }
 
@@ -343,8 +374,24 @@ Controls.Button = {
         Left: 0,
         Right: 1,
         Middle: 2,
-    }
-}
+    },
+    XR: {
+        Left: {
+            Trigger: 0,
+            Grip: 1,
+            Thumbstick: 3,
+            X: 4,
+            Y: 5,
+        },
+        Right: {
+            Trigger: 0,
+            Grip: 1,
+            Thumbstick: 3,
+            A: 4,
+            B: 5,
+        },
+    },
+};
 
 Controls.EventType = {
     /**
