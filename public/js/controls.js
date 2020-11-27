@@ -326,7 +326,6 @@ class Controls {
      * 3 = Y (-1.0 ... +1.0)
      */
     processInputSource(inputSource) {
-        console.log(inputSource.gamepad.axes);
         for (let i = 0; i < inputSource.gamepad.buttons.length; i++) {
             let button = inputSource.gamepad.buttons[i];
             if (button.pressed && !button.pressedBefore) {
@@ -336,6 +335,13 @@ class Controls {
                 button.pressedBefore = false;
                 this.sendEvent(Controls.EventType.ButtonUp, { buttonType: Controls.ButtonType.XRController, button: i, controller: inputSource.controller });
             }
+        }
+        let xAxis = inputSource.gamepad.axes[2];
+        let yAxis = inputSource.gamepad.axes[3];
+        if (xAxis !== inputSource.gamepad.xAxisValue || yAxis !== inputSource.gamepad.yAxisValue) {
+            inputSource.gamepad.xAxisValue = xAxis;
+            inputSource.gamepad.yAxisValue = yAxis;
+            this.sendEvent(Controls.EventType.AxisChange, { x: xAxis, y: yAxis, controller: inputSource.controller });
         }
     }
 
@@ -394,6 +400,13 @@ Controls.Button = {
 };
 
 Controls.EventType = {
+    /**
+     * Thumbsticks auf XR Controllern werden bewegt. Wird aber nur bei Änderung verschickt.
+     * @param x Wert für X-Achse zwischen -1,0 und +1,0
+     * @param y Wert für Y-Achse zwischen -1,0 und +1,0
+     * @param controller Instanz des Controllers
+     */
+    AxisChange: 'Controls.EventType.AxisChange',
     /**
      * @param buttonType Controls.ButtonType des gedrückten Buttons
      * @param button Button-Code, der gedrückt wurde

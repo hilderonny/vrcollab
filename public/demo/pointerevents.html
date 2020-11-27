@@ -10,8 +10,13 @@
         </style>
         <script type="module">
             import { SceneTemplate } from '../js/scene.js';
+            import { Controls } from '../js/controls.js';
             import { Cube, Cylinder, Sphere } from '../js/geometries.js';
             import { EventExtension, TeleportExtension } from '../js/extensions.js';
+
+            function handleAxisChange(_, {x, y, controller}) {
+                console.log('Axis change', x, y, controller.xrInputSource.handedness);
+            }
 
             function handleButtonDown(targetObject, {buttonType, button, controller}) {
                 console.log('Button DOWN on ' + targetObject.constructor.name, buttonType, button, controller?.xrInputSource.handedness);
@@ -60,6 +65,9 @@
             sphere.position.set(0, 1.25, -5);
             sphere.scale.set(2.5, 2.5, 2.5);
             sceneTemplate.scene.add(sphere);
+
+            // Controller-Achsen
+            sceneTemplate.controls.addEventListener(Controls.EventType.AxisChange, handleAxisChange);
 
         </script>
     </head>
